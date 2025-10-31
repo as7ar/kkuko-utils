@@ -4,8 +4,20 @@ import type { Database } from '@/app/types/database.types';
 import type { addWordQueryType, addWordThemeQueryType, DocsLogData, WordLogData } from '@/app/types/type';
 import { reverDuemLaw } from '../DuemLaw';
 import { sum } from 'es-toolkit';
+import { StorageError } from '@supabase/storage-js';
 
 const CACHE_DURATION = 10 * 60 * 1000;
+
+function storageErrorToPostgresError(storageError: StorageError): PostgrestError {
+    return {
+        name: storageError.name ?? "storage_error",
+        message: storageError.message ?? 'Unknown storage error',
+        details: "",
+        hint: "null",
+        code: '500',
+    }
+
+}
 
 class AddManager implements IAddManager {
     constructor(private readonly supabase: SupabaseClient<Database>) { }
@@ -47,7 +59,7 @@ class AddManager implements IAddManager {
         return this.supabase.from('words').upsert(q, { ignoreDuplicates: true, onConflict: "word" }).select('*');
     }
     public async wordsThemes(q: addWordThemeQueryType[]){
-       return await this.supabase.from('word_themes').upsert(q, { ignoreDuplicates: true, onConflict: "word_id,theme_id" }).select('words(word),themes(name)')
+        return await this.supabase.from('word_themes').upsert(q, { ignoreDuplicates: true, onConflict: "word_id,theme_id" }).select('words(word),themes(name)')
     }
     public async wordThemesReq(q: { word_id: number; theme_id: number; typez: 'add' | 'delete'; req_by: string | null; }[]) {
         return await this.supabase.from('word_themes_wait').upsert(q, { onConflict: "word_id,theme_id", ignoreDuplicates: true }).select('themes(name), typez');
@@ -208,11 +220,15 @@ class GetManager implements IGetManager {
         // 단어조합기 전용
         if (lenf){
             const {data:wordsData, error: wordsError} = await this.supabase.from('words').select('word, noin_canuse, k_canuse').in('length', [5, 6]);
+            const { data: engData, error: engError } = await this.supabase.storage.from('public_img').download('txt/eng_len_6_words.txt')
             if (wordsError) return {data: null, error: wordsError}
-            
+            if (engError) return {data: null, error: storageErrorToPostgresError(engError)}
+
+            const engText = await engData.text();
             const now = Date.now();
             const data = [
-                ...wordsData.map(({word,noin_canuse,k_canuse})=>({word,noin_canuse,k_canuse,status: "ok" as const}))
+                ...wordsData.map(({word,noin_canuse,k_canuse})=>({word,noin_canuse,k_canuse,status: "ok" as const})),
+                ...engText.split(/\r?\n/).map(word => ({word: word.trim(), noin_canuse: false, k_canuse: true, status: "ok" as const}))
             ]
             this.wordsCache[key] = {
                 data,
