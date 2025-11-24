@@ -326,7 +326,7 @@ class GetManager implements IGetManager {
         return await this.supabase.from('wait_word_themes').select('*,themes(*),wait_words(word)').in('wait_word_id', waitWordIds)
     }
     public async wordsByWords(words: string[]){
-        return await this.supabase.from('words').select('*').in('word',words);
+        return await this.supabase.rpc('get_words_with_themes',{words_input: words});
     }
     public async randomWordByFirstLetter(f: string[]) {
         const {data,error} = await this.supabase.rpc('random_word_ff',{fir1: f});

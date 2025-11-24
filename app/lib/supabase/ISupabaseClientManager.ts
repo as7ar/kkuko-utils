@@ -74,7 +74,7 @@ export interface IGetManager{
     waitWordsCount(): Promise<{count: number | null; error: PostgrestError | null}>;
     allWordWaitTheme(c?: "add" | "delete"): Promise<PostgrestSingleResponse<(word_themes_wait & {words: {word: string, id: number}; themes: theme; users: user | null})[]>>
     waitWordsThemes(waitWordIds: number[]): Promise<PostgrestSingleResponse<(wait_word_themes & {themes: theme, wait_words:{word: string}})[]>>;
-    wordsByWords(words: string[]): Promise<PostgrestSingleResponse<word[]>>;
+    wordsByWords(words: string[]): Promise<PostgrestSingleResponse<(word&{wthemes: number[]})[]>>;
     randomWordByFirstLetter(f: string[]): Promise<{data: string, error: null}|{data: null, error: PostgrestError}|{data: null, error: null}>;
     randomWordByLastLetter(l: string[]): Promise<{data: string, error: null}|{data: null, error: PostgrestError}|{data: null, error: null}>;
     wordThemeWaitByWordId(wordId: number): Promise<PostgrestSingleResponse<{themes: theme, typez: "add" | "delete"}[]>>;

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import useSWR from 'swr'
 import {
     Dialog,
     DialogContent,
@@ -44,14 +45,25 @@ export default function ThemeSelectModal({
     initialSelectedThemeIds,
     onConfirm
 }: ThemeSelectModalProps) {
-    const [allThemes, setAllThemes] = useState<AllTheme[]>([]);
     const [selectedThemes, setSelectedThemes] = useState<Set<number>>(new Set());
-    const [loading, setLoading] = useState(false);
 
-    // 모달이 열릴 때 주제 목록 가져오기
+    // useSWR로 전체 주제 목록 가져오기
+    const { data: allThemes = [], isLoading } = useSWR<AllTheme[]>(
+        isOpen ? 'allThemes' : null,
+        async () => {
+            const { data, error } = await SCM.get().allThemes();
+            if (error) throw error;
+            return data || [];
+        },
+        {
+            revalidateOnFocus: false,
+            revalidateOnReconnect: false
+        }
+    );
+
+    // 모달이 열릴 때 초기 선택된 주제 설정
     useEffect(() => {
         if (isOpen) {
-            loadThemes();
             // 초기 선택된 주제 설정 - 요청으로 들어온 주제 + 이미 선택한 주제
             const requestThemeIds = new Set(initialSelectedThemes.map(t => t.theme_id));
             const previouslySelectedIds = initialSelectedThemeIds || new Set<number>();
@@ -59,15 +71,6 @@ export default function ThemeSelectModal({
             setSelectedThemes(combinedIds);
         }
     }, [isOpen, initialSelectedThemes, initialSelectedThemeIds]);
-
-    const loadThemes = async () => {
-        setLoading(true);
-        const { data, error } = await SCM.get().allThemes();
-        if (!error && data) {
-            setAllThemes(data);
-        }
-        setLoading(false);
-    };
 
     // code가 숫자로만 이루어진지 확인
     const isNumericCode = (code: string) => /^\d+$/.test(code);
@@ -139,20 +142,20 @@ export default function ThemeSelectModal({
 
                     {/* 주제 선택 목록 */}
                     <ScrollArea className="h-[400px] pr-4">
-                        {loading ? (
+                        {isLoading ? (
                             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                                 주제 목록을 불러오는 중...
                             </div>
                         ) : (
                             <div className="space-y-6">
-                                {/* A그룹: 숫자 코드 */}
+                                {/* A그룹: 노인정 코드 */}
                                 {groupA.length > 0 && (
                                     <div>
                                         <h4 className="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-200">
-                                            일반 주제
+                                            노인정 주제
                                         </h4>
                                         <div className="grid grid-cols-2 gap-2">
-                                            {groupA.map((theme) => (
+                                            {groupA.sort((a,b) => a.name.localeCompare(b.name,'ko')).map((theme) => (
                                                 <div
                                                     key={theme.id}
                                                     className="flex items-center space-x-2 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
@@ -174,14 +177,14 @@ export default function ThemeSelectModal({
                                     </div>
                                 )}
 
-                                {/* B그룹: 특수 주제 */}
+                                {/* B그룹: 어인정 주제 */}
                                 {groupB.length > 0 && (
                                     <div>
                                         <h4 className="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-200">
-                                            특수 주제
+                                            어인정 주제
                                         </h4>
                                         <div className="grid grid-cols-2 gap-2">
-                                            {groupB.map((theme) => (
+                                            {groupB.sort((a,b) => a.name.localeCompare(b.name,'ko')).map((theme) => (
                                                 <div
                                                     key={theme.id}
                                                     className="flex items-center space-x-2 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800"

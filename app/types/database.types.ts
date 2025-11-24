@@ -459,29 +459,41 @@ export type Database = {
         Row: {
           count: number
           first_letter: string
+          k_count: number
+          n_count: number
         }
         Insert: {
           count?: number
           first_letter: string
+          k_count?: number
+          n_count?: number
         }
         Update: {
           count?: number
           first_letter?: string
+          k_count?: number
+          n_count?: number
         }
         Relationships: []
       }
       word_last_letter_counts: {
         Row: {
           count: number
+          k_count: number
           last_letter: string
+          n_count: number
         }
         Insert: {
           count?: number
+          k_count?: number
           last_letter: string
+          n_count?: number
         }
         Update: {
           count?: number
+          k_count?: number
           last_letter?: string
+          n_count?: number
         }
         Relationships: []
       }
@@ -565,6 +577,7 @@ export type Database = {
         Row: {
           added_at: string
           added_by: string | null
+          chosungs: string | null
           first_letter: string | null
           id: number
           k_canuse: boolean
@@ -576,6 +589,7 @@ export type Database = {
         Insert: {
           added_at?: string
           added_by?: string | null
+          chosungs?: string | null
           first_letter?: string | null
           id?: never
           k_canuse?: boolean
@@ -587,6 +601,7 @@ export type Database = {
         Update: {
           added_at?: string
           added_by?: string | null
+          chosungs?: string | null
           first_letter?: string | null
           id?: never
           k_canuse?: boolean
@@ -623,6 +638,7 @@ export type Database = {
         Args: { pairs: Json }
         Returns: undefined
       }
+      get_chosungs: { Args: { hangul: string }; Returns: string }
       get_delete_requests_by_themeid: {
         Args: { input_theme_id: number }
         Returns: {
@@ -631,22 +647,29 @@ export type Database = {
           word: string
         }[]
       }
-      get_doc_rank: {
-        Args: { doc_id: number }
-        Returns: number
-      }
-      get_user_monthly_rank: {
-        Args: { uid: string }
-        Returns: number
+      get_doc_rank: { Args: { doc_id: number }; Returns: number }
+      get_user_monthly_rank: { Args: { uid: string }; Returns: number }
+      get_words_with_themes: {
+        Args: { words_input: string[] }
+        Returns: {
+          added_at: string
+          added_by: string
+          chosungs: string
+          first_letter: string
+          id: number
+          k_canuse: boolean
+          last_letter: string
+          length: number
+          noin_canuse: boolean
+          word: string
+          wthemes: number[]
+        }[]
       }
       increment_contribution: {
         Args: { inc_amount: number; target_id: string }
         Returns: undefined
       }
-      increment_doc_views: {
-        Args: { doc_id: number }
-        Returns: undefined
-      }
+      increment_doc_views: { Args: { doc_id: number }; Returns: undefined }
       random_wait_word_ff: {
         Args: { prefixes: string[] }
         Returns: {
@@ -671,18 +694,9 @@ export type Database = {
           word: string
         }[]
       }
-      reset_monthly_contribution: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      update_last_update: {
-        Args: { docs_id: number }
-        Returns: undefined
-      }
-      update_last_updates: {
-        Args: { docs_ids: number[] }
-        Returns: undefined
-      }
+      reset_monthly_contribution: { Args: never; Returns: undefined }
+      update_last_update: { Args: { docs_id: number }; Returns: undefined }
+      update_last_updates: { Args: { docs_ids: number[] }; Returns: undefined }
     }
     Enums: {
       document_type: "letter" | "theme" | "ect"
