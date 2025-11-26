@@ -659,6 +659,21 @@ export type Database = {
           },
         ]
       }
+      words_count: {
+        Row: {
+          id: number
+          total_words: number
+        }
+        Insert: {
+          id?: number
+          total_words: number
+        }
+        Update: {
+          id?: number
+          total_words?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
