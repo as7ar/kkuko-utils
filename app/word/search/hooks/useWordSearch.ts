@@ -4,6 +4,7 @@ import { advancedQueryType } from '@/app/types/type';
 import { GameMode, SearchResult } from '../types';
 
 export const useWordSearch = () => {
+    const [searchType, setSearchType] = useState<'simple' | 'advanced'>('simple');
     const [mode, setMode] = useState<GameMode>('kor-start');
     const [results, setResults] = useState<SearchResult[]>([]);
     const [loading, setLoading] = useState(false);
@@ -100,7 +101,29 @@ export const useWordSearch = () => {
         }
     };
 
+    const handleSimpleSearch = async () => {
+        setLoading(true);
+        setSearchPerformed(true);
+        setResults([]);
+        
+        try {
+            if (simpleQuery.trim() === '') return;
+            
+            const { data, error } = await SCM.get().wordsByQuery(simpleQuery.trim());
+            if (error) {
+                console.error('검색 오류:', error);
+                return;
+            }
+            setResults(data.map(word => ({ word, nextWordCount: -1 })));
+        } catch (error) {
+            console.error('검색 중 오류 발생:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return {
+        searchType, setSearchType,
         mode, setMode,
         results, setResults,
         loading, setLoading,
@@ -118,6 +141,7 @@ export const useWordSearch = () => {
         simpleQuery, setSimpleQuery,
         displayLimit, setDisplayLimit,
         selectedTheme, setSelectedTheme,
-        handleSearch
+        handleSearch,
+        handleSimpleSearch
     };
 };

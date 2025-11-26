@@ -80,10 +80,8 @@ export interface IGetManager{
     wordThemeWaitByWordId(wordId: number): Promise<PostgrestSingleResponse<{themes: theme, typez: "add" | "delete"}[]>>;
     letterDocsByWord(word: string): Promise<PostgrestSingleResponse<docs[]>>;
     themeDocsByThemeNames(themeNames: string[]): Promise<PostgrestSingleResponse<docs[]>>;
-    firstWordCountByLetters(letters: string[]): Promise<number>;
-    lastWordCountByLetters(letters: string[]): Promise<number>;
-    /**
-     * @deprecated Use wordsByWords or wordsByAdvancedQuery instead  */
+    firstWordCountByLetters(letter: string): Promise<number>;
+    lastWordCountByLetters(letter: string): Promise<number>;
     wordsByQuery(query: string): Promise<{data: string[], error: null} | {data: null; error: PostgrestError}>;
     logsByFillter({filterState, filterType, from, to}:{filterState?: "approved" | "rejected" | "pending" | "all", filterType: "delete" | "add" | "all", from: number, to: number}): Promise<PostgrestSingleResponse<(log & {make_by_user: { nickname: string; } | null; processed_by_user: { nickname: string | null } | null;})[]>>
     docsLogsByFilter({ docsName, logType, from, to }: { docsName?: string; logType: 'add' | 'delete' | 'all'; from: number; to: number; }): Promise<PostgrestSingleResponse<(docs_log & { docs: docs; users: { nickname: string } | null })[]>>;

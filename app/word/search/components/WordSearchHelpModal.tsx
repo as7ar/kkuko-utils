@@ -139,6 +139,11 @@ const WordSearchHelpModal = () => {
                         💡 <strong>팁:</strong> 공격단어순 정렬을 사용하면 상대방이 대응하기 어려운 단어를 찾을 수 있습니다!
                     </p>
                 </div>
+                <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                    <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                        ⚠️ <strong>주의:</strong> 검색후 딜레이가 2초 이상있습니다.
+                    </p>
+                </div>
             </div>
         </HelpModal>
     );

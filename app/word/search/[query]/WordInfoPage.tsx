@@ -153,15 +153,11 @@ export default function WordInfoPage({ query }: { query: string }) {
                     const docc = docsData3.concat(docsData4).map(({id,name})=>({doc_id: id, doc_name: name}))
 
                     const ff = async () => {
-                        const fir1 = reverDuemLaw(wordTableCheck.word[0]);
-
-                        return await SCM.get().firstWordCountByLetters(fir1);
+                        return await SCM.get().firstWordCountByLetters(wordTableCheck.word[0]);
                     }
 
                     const lf = async () => {
-                        const las1 = [DuemRaw(wordTableCheck.word[wordTableCheck.word.length - 1])];
-
-                        return await SCM.get().lastWordCountByLetters(las1)
+                        return await SCM.get().lastWordCountByLetters(wordTableCheck.word[wordTableCheck.word.length - 1]);
                     }
 
                     let kkukoWikiok = false
@@ -217,16 +213,12 @@ export default function WordInfoPage({ query }: { query: string }) {
                     const docc = waitDocsData2.concat(waitDocsData4).map(({id,name})=>({doc_id: id, doc_name: name}))
 
                     const ff = async () => {
-                        const fir1 = reverDuemLaw(waitTableCheck.word[0]);
-
-                        return await SCM.get().firstWordCountByLetters(fir1);
+                        return await SCM.get().firstWordCountByLetters(waitTableCheck.word[0]);
 
                     }
 
                     const lf = async () => {
-                        const las1 = [DuemRaw(waitTableCheck.word[waitTableCheck.word.length - 1])];
-
-                        return await SCM.get().lastWordCountByLetters(las1);
+                        return await SCM.get().lastWordCountByLetters(waitTableCheck.word[waitTableCheck.word.length - 1]);
                     }
 
                     updateLoadingState(90, "정보 가공 중...");
