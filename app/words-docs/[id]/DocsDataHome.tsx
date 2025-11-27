@@ -118,10 +118,18 @@ const DocsDataHome = ({ id, data, metaData, starCount }: DocsPageProp) => {
                 }
             });
         } else {
-            data.forEach((item) => {
-                const firstSyllable = item.word[0].toLowerCase();
-                grouped.get(firstSyllable).push(item);
-            });
+            if (metaData.title.includes("앞말잇기")) {
+                data.forEach((item) => {
+                    const firstSyllable = item.word[item.word.length - 1].toLowerCase();
+                    grouped.get(firstSyllable).push(item);
+                });
+            } else {
+                data.forEach((item) => {
+                    const firstSyllable = item.word[0].toLowerCase();
+                    grouped.get(firstSyllable).push(item);
+                });
+            }
+            
         }
         
         return grouped;
@@ -138,6 +146,7 @@ const DocsDataHome = ({ id, data, metaData, starCount }: DocsPageProp) => {
                 return m2gr.get(char).length + m1gr.get(char).length > 0;
             }).map(char => `${char}`);
         } else {
+            if (metaData.title.includes("앞말잇기")) return [...new Set(data.map((v) => v.word[v.word.length - 1]))].sort((a, b) => a.localeCompare(b, "ko"));
             return [...new Set(data.map((v) => v.word[0]))].sort((a, b) => a.localeCompare(b, "ko"));
         }
     };
@@ -475,7 +484,7 @@ const DocsDataHome = ({ id, data, metaData, starCount }: DocsPageProp) => {
                                                 title={item.title} 
                                                 initialData={item.data || []} 
                                                 isMission={activeTab === "mission"}
-                                                isLong={activeTab==="long"}
+                                                isLong={activeTab==="long" || metaData.title.includes("긴단어")}
                                             />
                                         </div>
                                     </div>

@@ -98,7 +98,11 @@ class GetManager implements IGetManager {
         return await this.supabase.from('words').select('*,users(nickname)').eq('word', word).maybeSingle();
     }
     public async allDocs() {
-        return await this.supabase.from('docs').select('*, users(*)').eq('is_hidden', false)
+        let q = this.supabase.from('docs').select('*, users(*)');
+        if (process.env.NODE_ENV === 'production'){
+            q = q.eq('is_hidden', false);
+        }
+        return await q;
     }
     public async wordThemeByWordId(wordId: number) {
         return await this.supabase.from('word_themes').select('words(*),themes(*)').eq('word_id', wordId);
@@ -106,7 +110,7 @@ class GetManager implements IGetManager {
     public async docsInfoByDocsId(docsId: number) {
         return await this.supabase.from('docs').select('*,users(*)').eq('id', docsId).maybeSingle();
     }
-    public async docsWordCount({ name, duem, typez }: { name: string, duem: boolean, typez: "letter" | "theme" }) {
+    public async docsWordCount({ name, duem, typez }: { name: string, duem: boolean, typez: "letter" | "theme" }|{name:number, duem:boolean, typez:"ect"}) {
         if (typez === "letter") {
             if (duem) {
                 const { data, error } = await this.supabase.from('word_last_letter_counts').select('count').in('last_letter', reverDuemLaw(name[0]));
@@ -116,11 +120,20 @@ class GetManager implements IGetManager {
                 return { count: data?.count ?? 0, error }
             }
         }
-        else {
+        else if (typez === "theme") {
             const { data: themeData, error: themeDataError } = await this.themeInfoByThemeName(name)
             if (themeDataError || !themeData) return { count: 0, error: themeDataError }
             const { count, error } = await this.supabase.from('word_themes').select('*', { count: 'exact', head: true }).eq('theme_id', themeData.id);
             return { count, error }
+        } else if (typez === "ect") {
+            if (name === 201 || name === 202) {
+                const { count, error } = await this.supabase.from('words').select('*', { count: 'exact', head: true }).eq('k_canuse', true).gt('length', 8);
+                return { count, error };
+            } else {
+                return { count: 0, error: { name: "unexcept", details: "", code: "", message: "", hint: "" } as PostgrestError }
+            }
+        } else {
+            return { count: 0, error: { name: "unexcept", details: "", code: "", message: "", hint: "" } as PostgrestError }
         }
     }
     public async docsVeiwRankByDocsId(docsId: number) {
@@ -146,7 +159,7 @@ class GetManager implements IGetManager {
     public async docsWords({ name, duem, typez }: { name: string, duem: boolean, typez: "letter" | "theme" } | { name: number, duem: boolean, typez: "ect" }) {
         if (typez === "letter") {
             if (duem) {
-                const { data: wordsData, error: wordsError } = await this.supabase.from('words').select('*').in('last_letter', reverDuemLaw(name[0])).eq('k_canuse', true).neq('length', 1);
+                const { data: wordsData, error: wordsError } = await this.supabase.from('words').select('*').in('last_letter', [...new Set(...reverDuemLaw(name[0]), DuemLaw(name[0]))]).eq('k_canuse', true).neq('length', 1);
                 if (wordsError) return { data: null, error: wordsError }
                 let q = this.supabase.from('wait_words').select('word,requested_by,request_type');
                 for (const l of reverDuemLaw(name[0])) {
@@ -167,7 +180,7 @@ class GetManager implements IGetManager {
             const { data: themeData, error: themeDataError } = await this.themeInfoByThemeName(name)
             if (themeDataError) return { data: null, error: themeDataError };
             if (!themeData) return { data: { words: [], waitWords: [] }, error: null }
-            const { data: wordsData, error: wordsError } = await this.supabase.from('word_themes').select('words(*)').eq('theme_id', themeData.id);
+            const { data: wordsData, error: wordsError } = await this.supabase.rpc('get_words_by_theme', { theme_name: name });
             const { data: waitWordsData1, error: waitWordsError1 } = await this.supabase.from('word_themes_wait').select('words(*),typez,req_by').eq('theme_id', themeData.id);
             const { data: waitAddWordsData2, error: waitAddWordsError2 } = await this.supabase.from('wait_word_themes').select('wait_words(word,requested_by,request_type)').eq('theme_id', themeData.id);
             const { data: waitDelWordsData, error: waitDelWordsError } = await this.supabase.rpc('get_delete_requests_by_themeid', { input_theme_id: themeData.id })
@@ -191,9 +204,15 @@ class GetManager implements IGetManager {
             })
             waitWords.push(...waitDelWordsData)
 
-            return { data: { words: wordsData.filter(({ words: { word } }) => !waitWords.some(w => word === w.word)).map(({ words }) => words), waitWords }, error: null }
+            return { data: { words: wordsData.filter(({ word }) => !waitWords.some(w => word === w.word)), waitWords }, error: null }
         } else if (typez === "ect") {
-            // docsDataPage확인
+            if (name === 201 || name === 202) {
+                const { data: wordsData, error: wordsError } = await this.supabase.from('words').select('*').eq('k_canuse', true).gt('length', 8);
+                if (wordsError) return { data: null, error: wordsError }
+                const { data: waitWordsData, error: waitWordsError } = await this.supabase.rpc('get_long_wait_words_data');
+                if (waitWordsError) return { data: null, error: waitWordsError }
+                return { data: { words: wordsData.filter(({ word }) => !waitWordsData.some(w => word === w.word)), waitWords: waitWordsData }, error: null }
+            }
             return { data: null, error: { name: "unexcept", details: "", code: "", message: "", hint: "" } as PostgrestError }
         } else {
             return { data: null, error: { name: "unexcept", details: "", code: "", message: "", hint: "" } as PostgrestError }

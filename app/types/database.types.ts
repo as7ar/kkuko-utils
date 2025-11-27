@@ -792,7 +792,30 @@ export type Database = {
           word: string
         }[]
       }
+      get_long_wait_words_data: {
+        Args: never
+        Returns: {
+          request_type: Database["public"]["Enums"]["request_type_enum"]
+          requested_by: string
+          word: string
+        }[]
+      }
       get_user_monthly_rank: { Args: { uid: string }; Returns: number }
+      get_words_by_theme: {
+        Args: { theme_name: string }
+        Returns: {
+          added_at: string
+          added_by: string
+          chosungs: string
+          first_letter: string
+          id: number
+          k_canuse: boolean
+          last_letter: string
+          length: number
+          noin_canuse: boolean
+          word: string
+        }[]
+      }
       get_words_with_themes: {
         Args: { words_input: string[] }
         Returns: {

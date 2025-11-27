@@ -3,12 +3,10 @@ import WordInfo from './WordInfo';
 import { SCM } from '@/app/lib/supabaseClient';
 import ErrorPage from '@/app/components/ErrorPage';
 import { useEffect, useState } from 'react';
-import NotFound from '@/app/not-found-client';
 import type { PostgrestError } from '@supabase/supabase-js';
 import { calculateKoreanInitials, count } from '@/app/lib/lib';
 import LoadingPage, {useLoadingState } from '@/app/components/LoadingPage';
 import axios from 'axios';
-import  DuemRaw,{ reverDuemLaw } from '@/app/lib/DuemLaw';
 import { useRouter } from 'next/navigation';
 import { WordInfoProps } from './WordInfo';
 

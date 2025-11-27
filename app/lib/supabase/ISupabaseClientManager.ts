@@ -48,7 +48,7 @@ export interface IGetManager{
     allDocs(): Promise<PostgrestSingleResponse<(docs & { users: user | null })[]>>;
     wordThemeByWordId(wordId: number): Promise<PostgrestSingleResponse<word_theme[]>>;
     docsInfoByDocsId(docsId: number): Promise<PostgrestSingleResponse<(docs & { users: user | null }) | null>>
-    docsWordCount({ name, duem, typez }: { name: string; duem: boolean; typez: "letter" | "theme";}): Promise<{count: number | null; error: PostgrestError | null;}>
+    docsWordCount({ name, duem, typez }: { name: string, duem: boolean, typez: "letter" | "theme" }|{name:number, duem:boolean, typez:"ect"}): Promise<{count: number | null; error: PostgrestError | null;}>
     docsVeiwRankByDocsId(docsId: number): Promise<PostgrestSingleResponse<number>>;
     allThemes(): Promise<PostgrestSingleResponse<theme[]>>
     themeInfoByThemeName(name: string): Promise<{ data: theme | null; error: PostgrestError | null;}>
