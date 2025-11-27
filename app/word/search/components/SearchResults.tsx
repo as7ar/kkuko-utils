@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { BookOpen, ArrowRight, Search, Loader2 } from 'lucide-react';
@@ -23,6 +23,66 @@ export default function SearchResults({
     mode
 }: SearchResultsProps) {
     const parentRef = useRef<HTMLDivElement>(null);
+    const [showOverlay, setShowOverlay] = useState(false);
+    const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (document.hidden) {
+                // 탭이 비활성화되면 즉시 가림막 표시
+                if (hideTimeoutRef.current) {
+                    clearTimeout(hideTimeoutRef.current);
+                    hideTimeoutRef.current = null;
+                }
+                setShowOverlay(true);
+            } else {
+                // 탭이 활성화되면 0.5초 후 가림막 제거
+                hideTimeoutRef.current = setTimeout(() => {
+                    setShowOverlay(false);
+                }, 500);
+            }
+        };
+
+        const handleBlur = () => {
+            // 윈도우가 포커스를 잃으면 가림막 표시
+            if (hideTimeoutRef.current) {
+                clearTimeout(hideTimeoutRef.current);
+                hideTimeoutRef.current = null;
+            }
+            setShowOverlay(true);
+        };
+
+        const handleFocus = () => {
+            // 윈도우가 포커스를 얻으면 0.5초 후 가림막 제거
+            hideTimeoutRef.current = setTimeout(() => {
+                setShowOverlay(false);
+            }, 500);
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        window.addEventListener('blur', handleBlur);
+        window.addEventListener('focus', handleFocus);
+
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            window.removeEventListener('blur', handleBlur);
+            window.removeEventListener('focus', handleFocus);
+            if (hideTimeoutRef.current) {
+                clearTimeout(hideTimeoutRef.current);
+            }
+        };
+    }, []);
+
+    // 가림막이 표시될 때 스크롤 비활성화
+    useEffect(() => {
+        if (showOverlay && parentRef.current) {
+            const scrollElement = parentRef.current;
+            scrollElement.style.overflow = 'hidden';
+        } else if (parentRef.current) {
+            const scrollElement = parentRef.current;
+            scrollElement.style.overflow = '';
+        }
+    }, [showOverlay]);
 
     const virtualizer = useVirtualizer({
         count: results.length,
@@ -68,9 +128,22 @@ export default function SearchResults({
             
             <div 
                 ref={parentRef}
-                className="flex-1 overflow-y-auto overflow-x-hidden"
-                style={{ height: '100%' }}
+                className="flex-1 overflow-y-auto overflow-x-hidden relative"
+                style={{ 
+                    height: '100%',
+                    pointerEvents: showOverlay ? 'none' : 'auto'
+                }}
             >
+                {/* 가림막 오버레이 */}
+                {showOverlay && (
+                    <div className="absolute inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm pointer-events-auto">
+                        <div className="text-white text-lg font-medium">
+                            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
+                            로딩 중...
+                        </div>
+                    </div>
+                )}
+
                 {!searchPerformed ? (
                     <div className="flex items-center justify-center h-full">
                         <div className="text-center py-12">
