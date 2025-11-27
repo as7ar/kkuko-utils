@@ -462,7 +462,7 @@ export default function KoreanWordStats() {
                                         {selectedCategory === 'wordNotChain' && '끝말잇기 사용불가 단어란?'}
                                     </h3>
                                     <p className="text-sm text-gray-600 dark:text-gray-300">
-                                        {selectedCategory === 'acknowledged' && '끄코 특수규칙인 "아인정"을 켜야지 사용할 수 있는 단어입니다. 단어부에 의해 삭제/추가가 일어납니다.'}
+                                        {selectedCategory === 'acknowledged' && '끄코 특수규칙인 "어인정"을 켜야지 사용할 수 있는 단어입니다. 단어부에 의해 삭제/추가가 일어납니다.'}
                                         {selectedCategory === 'notAcknowledged' && '끄코에서 "어인정"여부에 상관없이 사용 가능한 단어입니다. 단어 추가/삭제가 잘 일어 나지 않습니다.'}
                                         {selectedCategory === 'added' && '사용자들이 DB에 추가를 요청한 단어들입니다. 검토 후 DB에 추가될 수 있습니다.'}
                                         {selectedCategory === 'deleted' && '사용자들이 DB에서 삭제를 요청한 단어들입니다. 검토 후 DB에서 제거될 수 있습니다.'}

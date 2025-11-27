@@ -9,6 +9,7 @@ interface Note {
     content: string;
     created_at: string;
     title: string;
+    link: string | null;
 }
 
 const ReleaseNote = () => {
@@ -132,6 +133,20 @@ const ReleaseNote = () => {
                                             <div className="prose dark:prose-invert max-w-none mt-2 whitespace-pre-wrap">
                                                 {note.content}
                                             </div>
+                                            {note.link && (
+                                                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                                    <a 
+                                                        href={note.link}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline"
+                                                    >
+                                                        <span className="font-medium">관련 링크:</span>
+                                                        <span className="ml-2">{note.link}</span>
+                                                        <ChevronRight size={16} className="ml-1" />
+                                                    </a>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>

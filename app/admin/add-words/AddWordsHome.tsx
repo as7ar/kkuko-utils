@@ -223,7 +223,8 @@ export default function WordsAddHome() {
         // 문서 및 주제 정보 맵핑
         const letterDocsInfo: Record<string, number> = {};
         const themeDocsInfo: Record<string, number> = {};
-        const themeCodeInfo: Record<string, number> = {}
+        const themeCodeInfo: Record<string, number> = {};
+        const themeInInfo: Record<number, {id: number, name: string, code: string}> = {};
 
         docsDatas.filter(({ typez }) => typez === "letter").forEach(({ id, name }) => {
             letterDocsInfo[name] = id
@@ -231,8 +232,9 @@ export default function WordsAddHome() {
         docsDatas.filter(({ typez }) => typez === "theme").forEach(({ id, name }) => {
             themeDocsInfo[name] = id
         })
-        themeData.forEach(({ id, code }) => {
+        themeData.forEach(({ id, code, name }) => {
             themeCodeInfo[code] = id
+            themeInInfo[id] = { id, name, code };
         })
 
         // DB 쿼리 준비
@@ -319,10 +321,8 @@ export default function WordsAddHome() {
         }
 
         setProgress(40);
-        const existingWordThemes: Record<number, { themeId: number, themeCode: string, themeName: string }[]> = {}; // 단어id - 주제들
         const checkedData: Record<string, number> = {}; // 단어 - 단어id
-        const existingWordMap: Record<string, { wordId: number, themes: { id: number, code: string, name: string }[] }> = {}; // 기존단어 - {단어id, 주제들}
-
+        
         // 기존 단어 체크
         const { data: needCheckedWordsData, error: ff } = await supabaseInQueryChunk(
             needCheckWord,
@@ -342,41 +342,21 @@ export default function WordsAddHome() {
         if (ff) return makeError(ff);
 
         // 기존 단어 맵핑
+        const existingWordThemes: Record<string, { themeId: number; themeCode: string; themeName: string; }[]> = {}; // 단어 - 기존주제들
         for (const data of needCheckedWordsData) {
             checkedData[data.word] = data.id
-            existingWordMap[data.word] = { wordId: data.id, themes: [] };
+            existingWordThemes[data.word] = data.wthemes.map((themeId) => {
+                const themeInfo = themeInInfo[themeId];
+                if (!themeInfo) return undefined;
+                return { themeId: themeInfo.id, themeCode: themeInfo.code, themeName: themeInfo.name };
+            }).filter(Boolean) as { themeId: number; themeCode: string; themeName: string; }[];
         }
-
-        // 기존 단어의 주제 맵핑
-        const { data: existingWordThemesData, error: ee } = await supabaseInQueryChunk(
-            needCheckedWordsData.map(({ id }) => id),
-            async (chunk) => {
-                const r = await SCM.get().wordsThemesByWordId(chunk);
-                return { ...r };
-            },
-            {
-                chunkSize: 100,
-                concurrency: 3,
-                onProgress(_, __, current, total) {
-                    setCurrentTask(`기존단어의 주제 체크중... ${current}/${total}`);
-                }
-            }
-        )
-        if (ee) return makeError(ee);
-        const result: Record<number, { themeId: number; themeCode: string; themeName: string; }[]> = {};
-        existingWordThemesData.forEach(({ word_id, themes: { id, code, name } }) => {
-            if (!result[word_id]) { result[word_id] = []; }
-            result[word_id].push({ themeId: id, themeCode: code, themeName: name });
-        });
-        Object.entries(result).forEach(([wordId, themes]) => {
-            existingWordThemes[Number(wordId)] = (existingWordThemes[Number(wordId)] ?? []).concat(themes.map(({ themeId, themeCode, themeName }) => ({ themeId, themeCode, themeName })));
-        });
 
         // 기존에는 있는 주제이지만 JSON에는 없는 주제 제거 쿼리 준비
         for (const data of jsonData) {
             const addThemesSet = new Set(data.themes);
-            if (existingWordThemes[checkedData[data.word]]) {
-                for (const existTheme of existingWordThemes[checkedData[data.word]]) {
+            if (existingWordThemes[data.word]) {
+                for (const existTheme of existingWordThemes[data.word]) {
                     if (!addThemesSet.has(existTheme.themeCode)) {
                         wordThemeDelQuery.push({
                             word_id: checkedData[data.word],

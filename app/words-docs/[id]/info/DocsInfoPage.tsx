@@ -77,6 +77,18 @@ export default function DocsInfoPage({ id }: { id: number }) {
                 return;
             }
             else{
+                if (docsData.id === 201 || docsData.id === 202){
+                    updateLoadingState(50,"문서의 단어 정보 가져오는 중...");
+                    const {count: ectWordsData1, error: ectWordsError1} = await SCM.get().docsWordCount({name: docsData.id, duem: docsData.duem, typez: "ect"});
+                    if (ectWordsError1){ return hanldeError(ectWordsError1); }
+                    const {data, error} = await SCM.get().docsVeiwRankByDocsId(docsData.id);
+                    if (error){ return hanldeError(error); }
+
+                    updateLoadingState(90,"데이터 가공중...");
+                    setDocsInfoData({metadata:docsData, wordsCount: ectWordsData1 ?? -1, rank: data, starCount:docsStarData});
+                    updateLoadingState(100,"완료!");
+                    return;
+                }
                 return setIsNotFound(true);
             }
         };

@@ -3,12 +3,10 @@ import WordInfo from './WordInfo';
 import { SCM } from '@/app/lib/supabaseClient';
 import ErrorPage from '@/app/components/ErrorPage';
 import { useEffect, useState } from 'react';
-import NotFound from '@/app/not-found-client';
 import type { PostgrestError } from '@supabase/supabase-js';
 import { calculateKoreanInitials, count } from '@/app/lib/lib';
 import LoadingPage, {useLoadingState } from '@/app/components/LoadingPage';
 import axios from 'axios';
-import  DuemRaw,{ reverDuemLaw } from '@/app/lib/DuemLaw';
 import { useRouter } from 'next/navigation';
 import { WordInfoProps } from './WordInfo';
 
@@ -23,6 +21,10 @@ export default function WordInfoPage({ query }: { query: string }) {
 
     const makeError = (erorr: PostgrestError) => {
         setErrorView(`단어 정보 데이터 로드중 오류.\nErrorName: ${erorr.name ?? "알수없음"}\nError Message: ${erorr.message ?? "없음"}\nError code: ${erorr.code}`);
+    };
+
+    const goTo404 = () => {
+        router.push("/404");
     };
 
     const wordSetFunc = (wordInfo: {
@@ -149,15 +151,11 @@ export default function WordInfoPage({ query }: { query: string }) {
                     const docc = docsData3.concat(docsData4).map(({id,name})=>({doc_id: id, doc_name: name}))
 
                     const ff = async () => {
-                        const fir1 = reverDuemLaw(wordTableCheck.word[0]);
-
-                        return await SCM.get().firstWordCountByLetters(fir1);
+                        return await SCM.get().firstWordCountByLetters(wordTableCheck.word[0]);
                     }
 
                     const lf = async () => {
-                        const las1 = [DuemRaw(wordTableCheck.word[wordTableCheck.word.length - 1])];
-
-                        return await SCM.get().lastWordCountByLetters(las1)
+                        return await SCM.get().lastWordCountByLetters(wordTableCheck.word[wordTableCheck.word.length - 1]);
                     }
 
                     let kkukoWikiok = false
@@ -213,16 +211,12 @@ export default function WordInfoPage({ query }: { query: string }) {
                     const docc = waitDocsData2.concat(waitDocsData4).map(({id,name})=>({doc_id: id, doc_name: name}))
 
                     const ff = async () => {
-                        const fir1 = reverDuemLaw(waitTableCheck.word[0]);
-
-                        return await SCM.get().firstWordCountByLetters(fir1);
+                        return await SCM.get().firstWordCountByLetters(waitTableCheck.word[0]);
 
                     }
 
                     const lf = async () => {
-                        const las1 = [DuemRaw(waitTableCheck.word[waitTableCheck.word.length - 1])];
-
-                        return await SCM.get().lastWordCountByLetters(las1);
+                        return await SCM.get().lastWordCountByLetters(waitTableCheck.word[waitTableCheck.word.length - 1]);
                     }
 
                     updateLoadingState(90, "정보 가공 중...");
@@ -269,7 +263,7 @@ export default function WordInfoPage({ query }: { query: string }) {
         
     }, [query]);
 
-    if (isNotFound) { return <NotFound /> }
+    if (isNotFound) { goTo404(); return null; }
 
     if (loadingState.isLoading) { return <LoadingPage title={'단어 정보'} /> }
 

@@ -1,4 +1,4 @@
-import type { addWordQueryType, addWordThemeQueryType, DocsLogData, WordLogData } from '@/app/types/type';
+import type { addWordQueryType, addWordThemeQueryType, advancedQueryType, DocsLogData, WordLogData } from '@/app/types/type';
 import { AuthError, OAuthResponse, PostgrestError, PostgrestSingleResponse, Session, Subscription } from '@supabase/supabase-js';
 import type { Database } from '@/app/types/database.types'
 
@@ -16,6 +16,8 @@ type log = Database['public']['Tables']['logs']['Row'];
 type word_themes_wait = Database['public']['Tables']['word_themes_wait']['Row'];
 type wait_word_themes = Database['public']['Tables']['wait_word_themes']['Row'];
 type notification = Database['public']['Tables']['notification']['Row'];
+type word_first_letter_counts = Database['public']['Tables']['word_first_letter_counts']['Row'];
+type word_last_letter_counts = Database['public']['Tables']['word_last_letter_counts']['Row'];
 
 type delete_word_themes_bulk = Database['public']['Functions']['delete_word_themes_bulk']['Returns'];
 
@@ -46,7 +48,7 @@ export interface IGetManager{
     allDocs(): Promise<PostgrestSingleResponse<(docs & { users: user | null })[]>>;
     wordThemeByWordId(wordId: number): Promise<PostgrestSingleResponse<word_theme[]>>;
     docsInfoByDocsId(docsId: number): Promise<PostgrestSingleResponse<(docs & { users: user | null }) | null>>
-    docsWordCount({ name, duem, typez }: { name: string; duem: boolean; typez: "letter" | "theme";}): Promise<{count: number | null; error: PostgrestError | null;}>
+    docsWordCount({ name, duem, typez }: { name: string, duem: boolean, typez: "letter" | "theme" }|{name:number, duem:boolean, typez:"ect"}): Promise<{count: number | null; error: PostgrestError | null;}>
     docsVeiwRankByDocsId(docsId: number): Promise<PostgrestSingleResponse<number>>;
     allThemes(): Promise<PostgrestSingleResponse<theme[]>>
     themeInfoByThemeName(name: string): Promise<{ data: theme | null; error: PostgrestError | null;}>
@@ -59,7 +61,7 @@ export interface IGetManager{
     allWords({ includeAddReq, includeDeleteReq, includeInjung, includeNoInjung, onlyWordChain, lenf }: { includeAddReq?: boolean; includeDeleteReq?: boolean; includeInjung?: boolean; includeNoInjung?: boolean; onlyWordChain?: boolean; lenf?: boolean; }): Promise<{ data: { word: string; noin_canuse: boolean; k_canuse: boolean; status: "ok" | "add" | "delete"; }[]; error: null } | {data: null; error: PostgrestError; }>
     letterDocs(): Promise<PostgrestSingleResponse<docs[]>>;
     addWaitDocs(): Promise<PostgrestSingleResponse<docs_wait[]>>;
-    releaseNote(): Promise<PostgrestSingleResponse<{ id: number; content: string; created_at: string; title: string; }[]>>;
+    releaseNote(): Promise<PostgrestSingleResponse<{ id: number; content: string; created_at: string; title: string; link: string | null }[]>>;
     userById(userId: string): Promise<PostgrestSingleResponse<user | null>>;
     session(): Promise<{data: {session: Session}, error: null} | {data: { session: null}, error: AuthError} | { data: {session: null}, error: null}>;
     usersByNickname(userName: string): Promise<PostgrestSingleResponse<user[]>>;
@@ -74,20 +76,23 @@ export interface IGetManager{
     waitWordsCount(): Promise<{count: number | null; error: PostgrestError | null}>;
     allWordWaitTheme(c?: "add" | "delete"): Promise<PostgrestSingleResponse<(word_themes_wait & {words: {word: string, id: number}; themes: theme; users: user | null})[]>>
     waitWordsThemes(waitWordIds: number[]): Promise<PostgrestSingleResponse<(wait_word_themes & {themes: theme, wait_words:{word: string}})[]>>;
-    wordsByWords(words: string[]): Promise<PostgrestSingleResponse<word[]>>;
+    wordsByWords(words: string[]): Promise<PostgrestSingleResponse<(word&{wthemes: number[]})[]>>;
     randomWordByFirstLetter(f: string[]): Promise<{data: string, error: null}|{data: null, error: PostgrestError}|{data: null, error: null}>;
     randomWordByLastLetter(l: string[]): Promise<{data: string, error: null}|{data: null, error: PostgrestError}|{data: null, error: null}>;
     wordThemeWaitByWordId(wordId: number): Promise<PostgrestSingleResponse<{themes: theme, typez: "add" | "delete"}[]>>;
     letterDocsByWord(word: string): Promise<PostgrestSingleResponse<docs[]>>;
     themeDocsByThemeNames(themeNames: string[]): Promise<PostgrestSingleResponse<docs[]>>;
-    firstWordCountByLetters(letters: string[]): Promise<number>;
-    lastWordCountByLetters(letters: string[]): Promise<number>;
+    firstWordCountByLetters(letter: string): Promise<number>;
+    lastWordCountByLetters(letter: string): Promise<number>;
     wordsByQuery(query: string): Promise<{data: string[], error: null} | {data: null; error: PostgrestError}>;
     logsByFillter({filterState, filterType, from, to}:{filterState?: "approved" | "rejected" | "pending" | "all", filterType: "delete" | "add" | "all", from: number, to: number}): Promise<PostgrestSingleResponse<(log & {make_by_user: { nickname: string; } | null; processed_by_user: { nickname: string | null } | null;})[]>>
     docsLogsByFilter({ docsName, logType, from, to }: { docsName?: string; logType: 'add' | 'delete' | 'all'; from: number; to: number; }): Promise<PostgrestSingleResponse<(docs_log & { docs: docs; users: { nickname: string } | null })[]>>;
     notice(): Promise<PostgrestSingleResponse<notification | null>>;
     wordsThemesByWordId(wordIds: number[]): Promise<PostgrestSingleResponse<{word_id: number, themes: theme}[]>>;
     allUser(sortField?: 'contribution' | 'month_contribution' | 'nickname', isAsc?: boolean): Promise<PostgrestSingleResponse<user[]>>;
+    letterCountInfo(): Promise<{data: {firstLetterCounts: Record<string, {count: number; k_count: number; n_count: number}>; lastLetterCounts: Record<string, {count: number; k_count: number; n_count: number}>;}, error: null}|{data: null; error: PostgrestError}>;
+    wordsByAdvancedQuery(input: advancedQueryType): Promise<{data: {word: string, nextWordCount: number}[], error: null} | {data: null; error: PostgrestError}>;
+    wordState(): Promise<{data: {firstLetterCounts: word_first_letter_counts[]; lastLetterCounts: word_last_letter_counts[];}, error: null}|{data: null; error: PostgrestError}>;
 }
 
 // delete 관련 타입

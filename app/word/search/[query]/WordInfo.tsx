@@ -348,7 +348,7 @@ const WordInfo = ({ wordInfo }: { wordInfo: WordInfoProps }) => {
                         </div>
 
                         {/* 마지막 글자로 끝나는 단어 버튼 */}
-                        {!goLastLetterWords ? (
+                        {goLastLetterWords === null ? (
                             <div className="flex items-center gap-1 text-red-400 border border-red-200 rounded-md px-3 py-2 dark:text-red-300 dark:border-red-700">
                                 <Loader2 size={16} className="animate-spin" />
                                 <span className="font-bold text-sm">로드중</span>
