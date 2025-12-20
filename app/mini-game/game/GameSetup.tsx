@@ -204,23 +204,23 @@ const GameSetup = () => {
 
     return (
         <>
-            <div className="game-setup-container bg-white h-[410px] p-2 shadow-lg w-[1000px]">
+            <div className="game-setup-container bg-white dark:bg-gray-900 h-[410px] p-2 shadow-lg dark:shadow-none w-[1000px]">
 
                 {/* 단어 로드 및 게임 설정을 가로로 배치 */}
                 <div className="mb-4 flex gap-6 flex-col md:flex-row">
                     {/* 단어 데이터베이스 섹션 (왼쪽) */}
                     <div className="flex-1">
-                        <h2 className="text-xl font-semibold mb-4 text-gray-700">단어 데이터베이스 설정</h2>
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 mb-4">
+                        <h2 className="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-200">단어 데이터베이스 설정</h2>
+                        <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-6 mb-4 bg-white dark:bg-gray-800">
                             <div className="mb-4">
-                                <label htmlFor="word-file-input" className="block text-sm font-medium text-gray-700 mb-2">단어 파일 업로드 (txt, 최대 1MB)</label>
+                                <label htmlFor="word-file-input" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">단어 파일 업로드 (txt, 최대 1MB)</label>
                                 <input
                                     id="word-file-input"
                                     type="file"
                                     accept=".txt"
                                     onChange={handleFileChange}
                                     disabled={isUploading}
-                                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
+                                    className="block w-full text-sm text-gray-500 dark:text-gray-200 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 dark:file:bg-blue-700 file:text-blue-700 dark:file:text-white hover:file:bg-blue-100 dark:hover:file:bg-blue-600 disabled:opacity-50"
                                 />
                             </div>
 
@@ -229,20 +229,20 @@ const GameSetup = () => {
                             <button onClick={handleUpload} disabled={!file || isUploading} className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors">{isUploading ? '업로드 중...' : '단어 불러오기'}</button>
                         </div>
 
-                        {message && (<div className={`p-3 rounded-lg mb-4 ${message.includes('오류') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>{message}</div>)}
+                            {message && (<div className={`p-3 rounded-lg mb-4 ${message.includes('오류') ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200' : 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200'}`}>{message}</div>)}
 
                         <div className="flex gap-3">
-                            <button onClick={() => setIsModalOpen(true)} className="bg-purple-500 text-white px-6 py-2 rounded-lg hover:bg-purple-600 transition-colors">단어 목록 조회 ({wordCount}개)</button>
-                            {wordCount > 0 && <button onClick={handleClearWords} className="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors">모든 단어 삭제</button>}
+                            <button onClick={() => setIsModalOpen(true)} className="bg-purple-500 text-white px-6 py-2 rounded-lg hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-700 transition-colors">단어 목록 조회 ({wordCount}개)</button>
+                            {wordCount > 0 && <button onClick={handleClearWords} className="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 transition-colors">모든 단어 삭제</button>}
                         </div>
                     </div>
 
                     {/* 게임 설정 (오른쪽) */}
-                    <div className="w-[320px] p-4 rounded-lg bg-gray-50 max-h-[320px] overflow-auto">
-                        <h2 className="text-xl font-semibold mb-4 text-gray-700">게임 설정</h2>
+                    <div className="w-[320px] p-4 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-gray-200 max-h-[320px] overflow-auto">
+                        <h2 className="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-200">게임 설정</h2>
                         <div className="space-y-3">
                             <div>
-                                <label className="block text-sm text-gray-700 mb-2">라운드 시간</label>
+                                <label className="block text-sm text-gray-700 dark:text-gray-200 mb-2">라운드 시간</label>
                                 <select value={localSetting?.roundTimeSeconds ?? 60} onChange={(e) => handleSettingChange({ roundTimeSeconds: parseInt(e.target.value, 10) })} className="w-full px-3 py-2 border rounded-lg">
                                     <option value={0}>무제한</option>
                                     <option value={10}>10초</option>
@@ -255,7 +255,7 @@ const GameSetup = () => {
                             </div>
 
                             <div>
-                                <label className="block text-sm text-gray-700 mb-2">언어</label>
+                                <label className="block text-sm text-gray-700 dark:text-gray-200 mb-2">언어</label>
                                 <div className="flex gap-3">
                                     <label className="inline-flex items-center gap-2">
                                         <input
@@ -265,7 +265,7 @@ const GameSetup = () => {
                                             checked={(localSetting?.lang ?? 'ko') === 'ko'}
                                             onChange={() => handleSettingChange({ lang: 'ko' })}
                                         />
-                                        <span className="text-sm text-gray-700">한국어</span>
+                                        <span className="text-sm text-gray-700 dark:text-gray-200">한국어</span>
                                     </label>
                                     <label className="inline-flex items-center gap-2">
                                         <input
@@ -275,13 +275,13 @@ const GameSetup = () => {
                                             checked={(localSetting?.lang ?? 'ko') === 'en'}
                                             onChange={() => handleSettingChange({ lang: 'en' })}
                                         />
-                                        <span className="text-sm text-gray-700">English</span>
+                                        <span className="text-sm text-gray-700 dark:text-gray-200">English</span>
                                     </label>
                                 </div>
                             </div>
 
                             <div>
-                                <label className="block text-sm text-gray-700 mb-2">모드</label>
+                                <label className="block text-sm text-gray-700 dark:text-gray-200 mb-2">모드</label>
                                 <div className="flex gap-3 mb-2">
                                     <label className="inline-flex items-center gap-2">
                                         <input
@@ -291,7 +291,7 @@ const GameSetup = () => {
                                             checked={(localSetting?.mode ?? 'normal') === 'normal'}
                                             onChange={() => handleSettingChange({ mode: 'normal' })}
                                         />
-                                        <span className="text-sm text-gray-700">일반</span>
+                                        <span className="text-sm text-gray-700 dark:text-gray-200">일반</span>
                                     </label>
                                     <label className="inline-flex items-center gap-2">
                                         <input
@@ -301,12 +301,12 @@ const GameSetup = () => {
                                             checked={(localSetting?.mode ?? 'normal') === 'mission'}
                                             onChange={() => handleSettingChange({ mode: 'mission' })}
                                         />
-                                        <span className="text-sm text-gray-700">미션</span>
+                                        <span className="text-sm text-gray-700 dark:text-gray-200">미션</span>
                                     </label>
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm text-gray-700 mb-2">힌트 모드</label>
+                                    <label className="block text-sm text-gray-70 dark:text-gray-200 mb-2">힌트 모드</label>
                                     <div className="flex gap-3">
                                         <label className="inline-flex items-center gap-2">
                                             <input
@@ -316,7 +316,7 @@ const GameSetup = () => {
                                                 checked={(localSetting?.hintMode ?? 'special') === 'special'}
                                                 onChange={() => handleSettingChange({ hintMode: 'special' })}
                                             />
-                                            <span className="text-sm text-gray-700">특수 힌트</span>
+                                            <span className="text-sm text-gray-700 dark:text-gray-200">특수 힌트</span>
                                         </label>
                                         <label className="inline-flex items-center gap-2">
                                             <input
@@ -326,7 +326,7 @@ const GameSetup = () => {
                                                 checked={(localSetting?.hintMode ?? 'special') === 'auto'}
                                                 onChange={() => handleSettingChange({ hintMode: 'auto' })}
                                             />
-                                            <span className="text-sm text-gray-700">랜덤 힌트</span>
+                                            <span className="text-sm text-gray-700 dark:text-gray-200">랜덤 힌트</span>
                                         </label>
                                     </div>
                                 </div>
@@ -335,14 +335,14 @@ const GameSetup = () => {
                             <div>
                                 <label className="inline-flex items-center gap-2">
                                     <input type="checkbox" checked={localSetting?.notAgainSameChar ?? false} onChange={(e) => handleSettingChange({ notAgainSameChar: e.target.checked })} />
-                                    <span className="text-sm text-gray-700">이전에 나온글자 미표시</span>
+                                    <span className="text-sm text-gray-700 dark:text-gray-200">이전에 나온글자 미표시</span>
                                 </label>
                             </div>
                             <div>
-                                <label className="block text-sm text-gray-700 mb-2">제시어 설정</label>
+                                    <label className="block text-sm text-gray-700 dark:text-gray-200 mb-2">제시어 설정</label>
                                 <div className="flex items-center gap-3">
-                                    <button onClick={openStartCharModal} className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-700 transition-colors">제시어 설정</button>
-                                    <span className="text-sm text-gray-700">선택됨: {(localSetting?.startChars ?? Array.from(gameManager.getSetting().wantStartChar).join('')).length}개</span>
+                                        <button onClick={openStartCharModal} className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors">제시어 설정</button>
+                                        <span className="text-sm text-gray-700 dark:text-gray-200">선택됨: {(localSetting?.startChars ?? Array.from(gameManager.getSetting().wantStartChar).join('')).length}개</span>
                                 </div>
                             </div>
 

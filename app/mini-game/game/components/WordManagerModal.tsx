@@ -138,17 +138,17 @@ const WordManagerModal = ({ onClose }: WordManagerModalProps) => {
             onClick={onClose}
         >
             <div
-                className="bg-white rounded-lg shadow-2xl w-[90%] max-w-[800px] max-h-[90vh] flex flex-col"
+                className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-[90%] max-w-[800px] max-h-[80vh] flex flex-col text-gray-900 dark:text-gray-200"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* 헤더 */}
-                <div className="flex justify-between items-center p-6 border-b">
-                    <h2 className="text-2xl font-bold text-gray-800">
+                <div className="flex justify-between items-center p-6 border-b dark:border-gray-700">
+                    <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
                         단어 목록 관리
                     </h2>
                     <button
                         onClick={onClose}
-                        className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+                        className="text-gray-500 dark:text-gray-300 hover:text-gray-700 text-2xl font-bold"
                     >
                         ×
                     </button>
@@ -158,7 +158,7 @@ const WordManagerModal = ({ onClose }: WordManagerModalProps) => {
                 <div className="p-6 border-b space-y-4">
                     {/* 검색 */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                             단어 검색 (접두사)
                         </label>
                         <input
@@ -166,7 +166,7 @@ const WordManagerModal = ({ onClose }: WordManagerModalProps) => {
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="예: 끝말, 게임..."
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-4 py-2 border border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                     </div>
 
@@ -178,28 +178,28 @@ const WordManagerModal = ({ onClose }: WordManagerModalProps) => {
                             onChange={(e) => setNewWord(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleAddWord()}
                             placeholder="새 단어 추가..."
-                            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                            className="flex-1 px-4 py-2 border border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                         />
                         <button
                             onClick={handleAddWord}
-                            className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors"
+                            className="bg-green-500 dark:bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-600 dark:hover:bg-green-700 transition-colors"
                         >
                             추가
                         </button>
                     </div>
                     {addError && (
-                        <div className="text-sm text-red-500 mt-2">{addError}</div>
+                        <div className="text-sm text-red-500 dark:text-red-300 mt-2">{addError}</div>
                     )}
                 </div>
 
                 {/* 단어 목록 */}
                 <div ref={parentRef} className="flex-1 overflow-y-auto p-6">
                     {isLoading ? (
-                        <div className="text-center text-gray-500 py-8">
+                        <div className="text-center text-gray-500 dark:text-gray-400 py-8">
                             로딩 중...
                         </div>
                     ) : words.length === 0 ? (
-                        <div className="text-center text-gray-500 py-8">
+                        <div className="text-center text-gray-500 dark:text-gray-400 py-8">
                             {searchQuery ? '검색 결과가 없습니다.' : '등록된 단어가 없습니다.'}
                         </div>
                     ) : (
@@ -288,10 +288,10 @@ const WordManagerModal = ({ onClose }: WordManagerModalProps) => {
                 </div>
 
                 {/* 푸터 */}
-                <div className="p-6 border-t bg-gray-50">
+                <div className="p-6 border-t bg-gray-50 dark:bg-gray-700">
                     <button
                         onClick={onClose}
-                        className="w-full bg-gray-600 text-white py-3 rounded-lg hover:bg-gray-700 transition-colors font-medium"
+                        className="w-full bg-gray-600 dark:bg-gray-700 text-white py-3 rounded-lg hover:bg-gray-700 dark:hover:bg-gray-800 transition-colors font-medium"
                     >
                         닫기
                     </button>
