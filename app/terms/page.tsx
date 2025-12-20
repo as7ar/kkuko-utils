@@ -29,7 +29,7 @@ const TermsOfService = () => {
           <CardHeader>
             <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mb-2">
               <Calendar className="h-4 w-4" />
-              <span>최종 수정일: 2025년 8월 27일</span>
+              <span>최종 수정일: 2025년 12월 20일</span>
             </div>
             <CardTitle className="text-xl text-slate-800 dark:text-slate-200">
               제1조 (목적)
@@ -38,7 +38,7 @@ const TermsOfService = () => {
           <CardContent className="space-y-6">
             <div>
               <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
-                본 약관은 hafskjfha(이하 &quot;서비스 제공자&quot;)가 제공하는 Kkuko Utils 서비스(이하 &quot;서비스&quot;)의 이용과 관련하여
+                본 약관은 SolidLoop-studio(이하 &quot;서비스 제공자&quot;)가 제공하는 Kkuko Utils 서비스(이하 &quot;서비스&quot;)의 이용과 관련하여
                 서비스 제공자와 이용자 간의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.
               </p>
             </div>
