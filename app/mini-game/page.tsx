@@ -2,6 +2,13 @@ import Providers from "./providers";
 import Game from "./game/Game";
 import MobileUnsupported from "./MobileUnsupported";
 
+export async function generateMetadata() {
+	return {
+		title: "끄코 유틸리티 - 미니 게임",
+		description: '끄코 유틸리티 - 미니 게임',
+	};
+}
+
 const MiniGamePage = () => {
     return (
         <Providers>
