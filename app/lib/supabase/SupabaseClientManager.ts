@@ -5,6 +5,7 @@ import type { addWordQueryType, addWordThemeQueryType, DocsLogData, WordLogData,
 import DuemLaw, { reverDuemLaw } from '../hangulUtils';
 import { sum } from 'es-toolkit';
 import { StorageError } from '@supabase/storage-js';
+import { misssionCharMask } from '../lib';
 
 const CACHE_DURATION = 10 * 60 * 1000;
 
@@ -211,6 +212,40 @@ class GetManager implements IGetManager {
                 const { data: waitWordsData, error: waitWordsError } = await this.supabase.rpc('get_long_wait_words_data');
                 if (waitWordsError) return { data: null, error: waitWordsError }
                 return { data: { words: wordsData.filter(({ word }) => !waitWordsData.some(w => word === w.word)), waitWords: waitWordsData }, error: null }
+            } else if (209 <= name && name <= 222) {
+                const c = ['가','나','다','라','마','바','사','아','자','차','카','타','파','하'][name - 209];
+                const bit = misssionCharMask([c]);
+                if (bit !== 0) {
+                    const {data: missionKWordsData, error: missionKWordsError} = await this.supabase.rpc('get_mission_words', {target_mask: bit})
+                    if (missionKWordsError) return { data: null, error: missionKWordsError }
+
+                    const grouped: Record<string, NonNullable<typeof missionKWordsData>> = {};
+                    (missionKWordsData || []).forEach(item => {
+                        const f = item.word[0];
+                        if (!grouped[f]) grouped[f] = [];
+                        grouped[f].push(item);
+                    });
+
+                    const filteredWords: NonNullable<typeof missionKWordsData> = [];
+                    Object.values(grouped).forEach(group => {
+                        const multi = group.filter(w => w.word.split(c).length - 1 >= 2);
+                        const single = group.filter(w => w.word.split(c).length - 1 === 1);
+
+                        filteredWords.push(...multi);
+                        
+                        if (multi.length < 10) {
+                            const needed = 10 - multi.length;
+                            single.sort((a, b) => {
+                                const lenDiff = b.word.length - a.word.length;
+                                if (lenDiff !== 0) return lenDiff;
+                                return a.word.localeCompare(b.word);
+                            });
+                            filteredWords.push(...single.slice(0, needed));
+                        }
+                    });
+
+                    return { data: { words: filteredWords, waitWords: [] }, error: null }
+                }
             }
             return { data: null, error: { name: "unexcept", details: "", code: "", message: "", hint: "" } as PostgrestError }
         } else {

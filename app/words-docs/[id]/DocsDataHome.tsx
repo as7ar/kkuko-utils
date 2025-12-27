@@ -35,6 +35,7 @@ interface DocsPageProp {
         typez: "letter" | "theme" | "ect"
     };
     starCount: string[];
+    isSpecial?: boolean;
 }
 
 interface VirtualTocItem {
@@ -46,7 +47,7 @@ type TabType = "all" | "mission" | "long";
 
 const MISSION_CHARS = "가나다라마바사아자차카타파하";
 
-const DocsDataHome = ({ id, data, metaData, starCount }: DocsPageProp) => {
+const DocsDataHome = ({ id, data, metaData, starCount, isSpecial }: DocsPageProp) => {
     const parentRef = useRef<HTMLDivElement>(null);
     const [tocList, setTocList] = useState<string[]>([]);
     const [wordsData] = useState<WordData[]>(data);
@@ -330,33 +331,37 @@ const DocsDataHome = ({ id, data, metaData, starCount }: DocsPageProp) => {
                                     <span>{currentStarCount}</span>
                                 </button>
 
-                                <Link href={`/words-docs/${id}/info`}>
-                                    <button className="px-6 py-3 bg-white/20 text-white rounded-xl font-medium hover:bg-white/30 transition-all duration-200 flex items-center gap-2 backdrop-blur-sm shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-                                        <Info className="w-5 h-5" />
-                                        <span className="hidden sm:inline">문서 정보</span>
-                                    </button>
-                                </Link>
+                                {id !== 208 && (
+                                    <>
+                                        <Link href={`/words-docs/${id}/info`}>
+                                            <button className="px-6 py-3 bg-white/20 text-white rounded-xl font-medium hover:bg-white/30 transition-all duration-200 flex items-center gap-2 backdrop-blur-sm shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                                                <Info className="w-5 h-5" />
+                                                <span className="hidden sm:inline">문서 정보</span>
+                                            </button>
+                                        </Link>
 
-                                <Link href={`/words-docs/${id}/logs`}>
-                                    <button className="px-6 py-3 bg-white/20 text-white rounded-xl font-medium hover:bg-white/30 transition-all duration-200 flex items-center gap-2 backdrop-blur-sm shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-                                        <Clock className="w-5 h-5" />
-                                        <span className="hidden sm:inline">로그</span>
-                                    </button>
-                                </Link>
+                                        <Link href={`/words-docs/${id}/logs`}>
+                                            <button className="px-6 py-3 bg-white/20 text-white rounded-xl font-medium hover:bg-white/30 transition-all duration-200 flex items-center gap-2 backdrop-blur-sm shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                                                <Clock className="w-5 h-5" />
+                                                <span className="hidden sm:inline">로그</span>
+                                            </button>
+                                        </Link>
 
-                                <button
-                                    className="px-6 py-3 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                                    onClick={handleDownload}
-                                >
-                                    <Download className="w-5 h-5" />
-                                    <span className="hidden sm:inline">다운로드</span>
-                                </button>
+                                        <button
+                                            className="px-6 py-3 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                                            onClick={handleDownload}
+                                        >
+                                            <Download className="w-5 h-5" />
+                                            <span className="hidden sm:inline">다운로드</span>
+                                        </button>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>
 
                     {/* 탭 네비게이션 */}
-                    {metaData.typez !== "ect" && (
+                    {metaData.typez !== "ect" && id !== 208 && (
                         <div className="px-8 pt-6 pb-2 overflow-x-auto">
                             <nav className="flex space-x-1" aria-label="Tabs">
                                 {(["all", "mission", "long"] as TabType[]).map((tab) => (
@@ -392,7 +397,7 @@ const DocsDataHome = ({ id, data, metaData, starCount }: DocsPageProp) => {
                 </div>
 
                 {/* 목차 섹션 */}
-                {!isTabSwitching && (
+                {!isTabSwitching && id !== 208 && (
                     <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg border-0 p-6 mb-8">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
@@ -409,6 +414,23 @@ const DocsDataHome = ({ id, data, metaData, starCount }: DocsPageProp) => {
                 )}
 
                 {/* 컨텐츠 섹션 */}
+                {id === 208 ? (
+                    <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg border-0 p-8">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                            {["가","나","다","라","마","바","사","아","자","차","카","타","파","하"].map((char, index) => (
+                                <Link 
+                                    key={char} 
+                                    href={`/words-docs/${208 + index + 1}`}
+                                    className="flex items-center justify-center p-6 bg-gray-50 dark:bg-gray-800 rounded-xl hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors duration-200 group"
+                                >
+                                    <span className="text-2xl font-bold text-gray-700 dark:text-gray-200 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                                        {char}
+                                    </span>
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                ) : (
                 <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg border-0 overflow-hidden">
                     {isLoading || isTabSwitching ? (
                         <div className="p-8">
@@ -485,6 +507,7 @@ const DocsDataHome = ({ id, data, metaData, starCount }: DocsPageProp) => {
                                                 initialData={item.data || []} 
                                                 isMission={activeTab === "mission"}
                                                 isLong={activeTab==="long" || metaData.title.includes("긴단어")}
+                                                isSp={isSpecial ? {m: metaData.title[metaData.title.length - 1]} : undefined}
                                             />
                                         </div>
                                     </div>
@@ -494,6 +517,7 @@ const DocsDataHome = ({ id, data, metaData, starCount }: DocsPageProp) => {
                     </div>
                     )}
                 </div>
+                )}
             </div>
 
             {loginNeedModalOpen && (
