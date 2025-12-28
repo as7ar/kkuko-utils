@@ -54,7 +54,8 @@ const DocsDataHome = ({ id, data, metaData, starCount, isSpecial }: DocsPageProp
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isTabSwitching, setIsTabSwitching] = useState<boolean>(false);
     const [activeTab, setActiveTab] = useState<TabType>("all");
-    const user = useSelector((state: RootState) => state.user);
+        const user = useSelector((state: RootState) => state.user);
+        const specialIds = [208, 223, 238];
     const [isUserStarreda, setIsUserStarreda] = useState<boolean>(false);
     const [loginNeedModalOpen, setLoginNeedModalOpen] = useState<boolean>(false);
     const [errorModalView, seterrorModalView] = useState<ErrorMessage | null>(null);
@@ -141,15 +142,15 @@ const DocsDataHome = ({ id, data, metaData, starCount, isSpecial }: DocsPageProp
         return groupWordsBySyllable(filteredData);
     }, [filteredData, activeTab]);
 
-    // mission chars last-update fetch (for id === 208 special grid)
+
     useEffect(() => {
-        if (id !== 208) return;
+        if (![208,223,238].includes(id)) return;
 
         let mounted = true;
         const fetchUpdates = async () => {
             const chars = MISSION_CHARS.split('');
             const results = await Promise.all(chars.map(async (_c, index) => {
-                const docId = 208 + index + 1;
+                const docId = id + index + 1;
                 try {
                     const res = await SCM.get().docsLastUpdate(docId);
                     return { docId, last: res.data?.last_update ?? null };
@@ -358,7 +359,7 @@ const DocsDataHome = ({ id, data, metaData, starCount, isSpecial }: DocsPageProp
                                     <span>{currentStarCount}</span>
                                 </button>
 
-                                {id !== 208 && (
+                                {!specialIds.includes(id) && (
                                     <>
                                         <Link href={`/words-docs/${id}/info`}>
                                             <button className="px-6 py-3 bg-white/20 text-white rounded-xl font-medium hover:bg-white/30 transition-all duration-200 flex items-center gap-2 backdrop-blur-sm shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
@@ -388,7 +389,7 @@ const DocsDataHome = ({ id, data, metaData, starCount, isSpecial }: DocsPageProp
                     </div>
 
                     {/* 탭 네비게이션 */}
-                    {metaData.typez !== "ect" && id !== 208 && (
+                    {metaData.typez !== "ect" && !specialIds.includes(id) && (
                         <div className="px-8 pt-6 pb-2 overflow-x-auto">
                             <nav className="flex space-x-1" aria-label="Tabs">
                                 {(["all", "mission", "long"] as TabType[]).map((tab) => (
@@ -421,7 +422,7 @@ const DocsDataHome = ({ id, data, metaData, starCount, isSpecial }: DocsPageProp
                 </div>
 
                 {/* 목차 섹션 */}
-                {!isTabSwitching && id !== 208 && (
+                {!isTabSwitching && !specialIds.includes(id) && (
                     <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg border-0 p-6 mb-8">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
@@ -438,22 +439,22 @@ const DocsDataHome = ({ id, data, metaData, starCount, isSpecial }: DocsPageProp
                 )}
 
                 {/* 컨텐츠 섹션 */}
-                {id === 208 ? (
+                {specialIds.includes(id) ? (
                     <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg border-0 p-8">
                         <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">미션글자</h2>
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4">
                             {["가", "나", "다", "라", "마", "바", "사", "아", "자", "차", "카", "타", "파", "하"].map((char, index) => (
                                 <Link
                                     key={char}
-                                    href={`/words-docs/${208 + index + 1}`}
+                                    href={`/words-docs/${id + index + 1}`}
                                     className="flex items-center justify-center p-6 bg-gray-50 dark:bg-gray-800 rounded-xl hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors duration-200 group"
                                 >
                                     <span className="text-2xl font-bold text-gray-700 dark:text-gray-200 group-hover:text-blue-600 dark:group-hover:text-blue-400">
                                         {char}
                                     </span>
                                     <div className="mt-2 text-center">
-                                        {charLastUpdates[208 + index + 1] ? (
-                                            <span className="text-xs text-gray-500 dark:text-gray-400">{new Date(charLastUpdates[208 + index + 1] as string).toLocaleString(undefined, { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone })}</span>
+                                        {charLastUpdates[id + index + 1] ? (
+                                            <span className="text-xs text-gray-500 dark:text-gray-400">{new Date(charLastUpdates[id + index + 1] as string).toLocaleString(undefined, { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone })}</span>
                                         ) : (
                                             <span className="text-xs text-gray-400">업데이트 정보 없음</span>
                                         )}

@@ -803,6 +803,28 @@ export type Database = {
           word: string
         }[]
       }
+      get_mission_len3_words: {
+        Args: { target_mask: number }
+        Returns: {
+          added_at: string
+          added_by: string | null
+          chosungs: string | null
+          first_letter: string | null
+          id: number
+          k_canuse: boolean
+          last_letter: string | null
+          length: number | null
+          mission_mark: number
+          noin_canuse: boolean
+          word: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "words"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_mission_mark: { Args: { input_word: string }; Returns: number }
       get_mission_words: {
         Args: { target_mask: number }
