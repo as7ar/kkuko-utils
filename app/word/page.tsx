@@ -1,5 +1,5 @@
 import Link from "next/link";
-import {BarChart3, ChevronRight, Clock, Database, Download, FileText, Plus, Search, Upload} from "lucide-react";
+import {BarChart3, ChevronRight, Clock, Code, Database, Download, FileText, Plus, Search, Upload} from "lucide-react";
 
 export async function generateMetadata() {
     return {
@@ -71,6 +71,14 @@ const features = [
         link: "/word/stats",
         icon: BarChart3,
         color: "from-indigo-500 to-blue-500",
+        bgColor: "group-hover:bg-indigo-50 dark:group-hover:bg-indigo-950/20"
+    },
+    {
+        title: "오픈 API",
+        description: "끄코 유틸을 API에서 만나보세요",
+        link: "/openapi/word",
+        icon: Code,
+        color: "from-indigo-500 to-yellow-500",
         bgColor: "group-hover:bg-indigo-50 dark:group-hover:bg-indigo-950/20"
     },
 ];

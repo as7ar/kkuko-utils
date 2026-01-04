@@ -75,7 +75,7 @@ const Header = () => {
         { href: "/manager-tool", label: "단어장 관리 도구", match: p => p.includes("/manager-tool") },
         { href: "/words-docs", label: "단어장 공유", match: p => p.includes("/words-docs") },
         { href: "/word", label: "오픈DB", match: p => p === "/word" || p.includes("/word/") },
-        { href: "/openapi", label: "오픈API", match: p => p=== "/openapi" || p.includes("/openapi") },
+        // { href: "/openapi", label: "오픈API", match: p => p=== "/openapi" || p.includes("/openapi") },
     ];
 
     const activeIndex = navDefs.findIndex(item => item.match(pathname));

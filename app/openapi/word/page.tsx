@@ -38,7 +38,7 @@ export default function OpenApiDocsPage() {
         { parameterName: "maxLength", type: "number", description: "최대 글자 수", defaultValue: "100" },
         { parameterName: "duem", type: "boolean", description: "두음법칙 적용 여부", defaultValue: "true" },
         { parameterName: "mission", type: "string", description: "포함해야 할 특정 글자", defaultValue: '""' },
-        { parameterName: "themeId", type: "number", description: "jaqi 모드 사용 시 필수 테마 Id", defaultValue: "-" },
+        { parameterName: "themeId", type: "number", description: "자음 퀴즈 모드 사용 시 필수 테마 Id", defaultValue: "-" },
     ];
 
     return (

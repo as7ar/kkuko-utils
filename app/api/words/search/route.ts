@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
                 limit: isNaN(displayLimit) ? 100 : displayLimit
             };
         } else if (gameMode === 'jaqi') {
-            if (!themeId) return handleErrorResponse('테마 ID가 필요합니다.');
+            if (!themeId) return handleErrorResponse('주제 ID가 필요합니다.');
             searchOptions = {
                 mode: 'jaqi',
                 query: searchQuery.trim(),
