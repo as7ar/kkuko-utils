@@ -76,7 +76,7 @@ const features = [
     {
         title: "오픈 API",
         description: "끄코 유틸을 API에서 만나보세요",
-        link: "/openapi/word",
+        link: "/openapi/",
         icon: Code,
         color: "from-indigo-500 to-yellow-500",
         bgColor: "group-hover:bg-indigo-50 dark:group-hover:bg-indigo-950/20"
