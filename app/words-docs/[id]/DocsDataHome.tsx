@@ -58,7 +58,7 @@ const DocsDataHome = ({ id, data, metaData, starCount, isSpecial }: DocsPageProp
         const specialIds = [208, 223, 238];
     const [isUserStarreda, setIsUserStarreda] = useState<boolean>(false);
     const [loginNeedModalOpen, setLoginNeedModalOpen] = useState<boolean>(false);
-    const [errorModalView, seterrorModalView] = useState<ErrorMessage | null>(null);
+    const [errorModalView, setErrorModalView] = useState<ErrorMessage | null>(null);
     const [charLastUpdates, setCharLastUpdates] = useState<Record<number, string | null>>({});
 
     // 유저 즐겨찾기 상태 업데이트
@@ -350,7 +350,7 @@ const DocsDataHome = ({ id, data, metaData, starCount, isSpecial }: DocsPageProp
                                             ? "bg-yellow-400 text-yellow-900 hover:bg-yellow-300"
                                             : "bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm"
                                         }`}
-                                    onClick={hadnleDocsStar}
+                                    onClick={handleDocsStar}
                                 >
                                     <Star
                                         className="w-5 h-5"

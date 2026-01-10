@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import HelpModal from '@/app/components/HelpModal';
 
-interface HelpModalprop {
+interface HelpModalProp {
     wantGo?: 1 | 2 | 3 | 4 | 5;
 }
 
