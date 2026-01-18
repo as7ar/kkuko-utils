@@ -75,10 +75,10 @@ const Header = () => {
         { href: "/manager-tool", label: "단어장 관리 도구", match: p => p.includes("/manager-tool") },
         { href: "/words-docs", label: "단어장 공유", match: p => p.includes("/words-docs") },
         { href: "/word", label: "오픈DB", match: p => p === "/word" || p.includes("/word/") },
-        // { href: "/openapi", label: "오픈API", match: p => p=== "/openapi" || p.includes("/openapi") },
+        { href: "/kkuko", label: "끄코", match: p => p === "/kkuko" || p.includes("/kkuko/") },
     ];
 
-    const activeIndex = navDefs.findIndex(item => item.match(pathname));
+    const activeIndex = pathname === "/" ? -2 : pathname.includes("/admin") ? -3 : navDefs.findIndex(item => item.match(pathname));
 
     const navItems = [
         ...navDefs.map((item, i) => ({
