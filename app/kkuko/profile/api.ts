@@ -1,0 +1,41 @@
+import axios from "axios";
+import axiosRetry from "axios-retry";
+
+axiosRetry(axios, {
+    retries: 5,
+    retryCondition: (error) => {
+        return axiosRetry.isNetworkOrIdempotentRequestError(error) || error.response?.status === 500;
+    },
+    retryDelay: (retryCount) => {
+        return axiosRetry.exponentialDelay(retryCount);
+    }
+});
+
+const client = axios.create({
+    baseURL: 'https://api.solidloop-studio.xyz/api/v1',
+    timeout: 5000,
+});
+
+export async function fetchModes() {
+    return await client.get('/mode')
+}
+
+export async function fetchTotalUsers() {
+    return await client.get('/profile/total');
+}
+
+export async function fetchProfile(query: string, type: 'nick' | 'id') {
+    return await client.get(`/profile/${encodeURIComponent(query)}`, {
+        params: { type }
+    })
+}
+
+export async function fetchItems(itemsIds: string) {
+    return await client.get(`/item?query=${encodeURIComponent(itemsIds)}`);
+}
+
+export async function fetchExpRank(userId: string) {
+    return await axios.get<{rank: number, id: string}>('/api/kkuko/api/ranking', {
+        params: { id: userId }
+    });
+}

@@ -1,70 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Search, Moon, Sun } from 'lucide-react';
+import { Search } from 'lucide-react';
+import {
+    fetchModes as fetchModesApi,
+    fetchTotalUsers as fetchTotalUsersApi,
+    fetchProfile as fetchProfileApi,
+    fetchItems as fetchItemsApi,
+    fetchExpRank as fetchExpRankApi
+} from '../profile/api';
+import TryRenderImg from './TryRenderImg';
+import { Equipment, ItemInfo, KkukoRecord, Mode, ProfileData } from '@/types/kkuko.types'
 
-// Types
-interface UserProfile {
-    id: string;
-    nickname: string;
-    exp: number;
-    observedAt: string;
-    exordial: string;
-    level: number;
-}
-
-interface Equipment {
-    userId: string;
-    slot: string;
-    itemId: string;
-}
-
-interface KkukoRecord {
-    id: string;
-    userId: string;
-    modeId: string;
-    total: number;
-    win: number;
-    exp: number;
-    playtime: number;
-}
-
-interface Presence {
-    userId: string;
-    channelId: string | null;
-    roomId: string | null;
-    crawlerId: string;
-    updatedAt: string;
-}
-
-interface ProfileData {
-    user: UserProfile;
-    equipment: Equipment[];
-    record: KkukoRecord[];
-    presence: Presence;
-}
-
-interface ItemInfo {
-    id: string;
-    name: string;
-    description: string;
-    updatedAt: number;
-    group: string;
-    options: {
-        gEXP?: number;
-        hEXP?: number;
-        gMNY?: number;
-        hMNY?: number;
-        [key: string]: number | undefined;
-    };
-}
-
-interface Mode {
-    modeId: string;
-    modeName: string;
-    group: string;
-}
 
 // Nickname color mapping
 const NICKNAME_COLORS: Record<string, string> = {
@@ -82,8 +30,6 @@ const NICKNAME_COLORS: Record<string, string> = {
     brown: '#613B3B',
 };
 
-const API_BASE_URL = 'https://api.solidloop-studio.xyz/api/v1';
-
 // Option name mapping
 const OPTION_NAMES: Record<string, string> = {
     gEXP: '획득 경험치',
@@ -92,10 +38,20 @@ const OPTION_NAMES: Record<string, string> = {
     hMNY: '분당 추가 핑'
 };
 
+const slotNames: Record<string, string> = {
+    NIK: '닉네임',
+    CHA: '캐릭터',
+    BAC: '배경',
+    RIN: '반지',
+    MOR: '변신',
+    HAN: '손',
+    BAD: '뱃지'
+};
+
 export default function KkukoProfile() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    
+
     const [searchQuery, setSearchQuery] = useState('');
     const [searchType, setSearchType] = useState<'nick' | 'id'>('nick');
     const [profileData, setProfileData] = useState<ProfileData | null>(null);
@@ -104,34 +60,21 @@ export default function KkukoProfile() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showItemModal, setShowItemModal] = useState(false);
-    const [isDarkMode, setIsDarkMode] = useState(false);
     const [totalUserCount, setTotalUserCount] = useState<number>(0);
+    const [expRank, setExpRank] = useState<number | null>(null);
+    const [isLvImgLoading, setIsLvImgLoading] = useState(true);
 
     // Load modes on mount
     useEffect(() => {
         fetchModes();
         fetchTotalUsers();
-        // Load dark mode preference
-        const savedTheme = localStorage.getItem('theme');
-        setIsDarkMode(savedTheme === 'dark');
     }, []);
-
-    // Apply dark mode class to document
-    useEffect(() => {
-        if (isDarkMode) {
-            document.documentElement.classList.add('dark');
-            localStorage.setItem('theme', 'dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-            localStorage.setItem('theme', 'light');
-        }
-    }, [isDarkMode]);
 
     // Handle URL query parameters
     useEffect(() => {
         const nick = searchParams.get('nick');
         const id = searchParams.get('id');
-        
+
         if (nick) {
             setSearchQuery(nick);
             setSearchType('nick');
@@ -145,8 +88,8 @@ export default function KkukoProfile() {
 
     const fetchModes = async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/mode`);
-            const result = await response.json();
+            const response = await fetchModesApi();
+            const result = await response.data;
             if (result.status === 200) {
                 setModesData(result.data);
             }
@@ -157,8 +100,8 @@ export default function KkukoProfile() {
 
     const fetchTotalUsers = async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/profile/total`);
-            const result = await response.json();
+            const response = await fetchTotalUsersApi();
+            const result = await response.data;
             if (result.status === 200) {
                 setTotalUserCount(result.data.totalUsers);
             }
@@ -171,26 +114,29 @@ export default function KkukoProfile() {
         setLoading(true);
         setError(null);
         setProfileData(null);
-        
+
         try {
-            const response = await fetch(`${API_BASE_URL}/profile/${encodeURIComponent(query)}?type=${type}`);
-            
+            const response = await fetchProfileApi(query, type);
+
             if (response.status === 404) {
                 setError('등록된 유저가 아닙니다.');
                 setLoading(false);
                 return;
             }
-            
-            const result = await response.json();
-            
+
+            const result = await response.data;
+
             if (result.status === 200) {
                 setProfileData(result.data);
-                
+
                 // Fetch items data
                 if (result.data.equipment.length > 0) {
                     const itemIds = result.data.equipment.map((eq: Equipment) => eq.itemId).join(',');
                     fetchItems(itemIds);
                 }
+
+                // Fetch exp rank
+                fetchExpRank(result.data.user.id);
             }
         } catch (err) {
             setError('프로필을 불러오는데 실패했습니다.');
@@ -202,8 +148,8 @@ export default function KkukoProfile() {
 
     const fetchItems = async (itemIds: string) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/item?query=${itemIds}`);
-            const result = await response.json();
+            const response = await fetchItemsApi(itemIds);
+            const result = await response.data;
             if (result.status === 200) {
                 setItemsData(Array.isArray(result.data) ? result.data : [result.data]);
             }
@@ -212,9 +158,18 @@ export default function KkukoProfile() {
         }
     };
 
+    const fetchExpRank = async (userId: string) => {
+        try {
+            const response = await fetchExpRankApi(userId);
+            setExpRank(response.data.rank);
+        } catch (err) {
+            console.error('Failed to fetch exp rank:', err);
+        }
+    };
+
     const handleSearch = () => {
         if (!searchQuery.trim()) return;
-        
+
         const queryParam = searchType === 'nick' ? 'nick' : 'id';
         router.push(`/kkuko/profile?${queryParam}=${encodeURIComponent(searchQuery)}`);
         fetchProfile(searchQuery, searchType);
@@ -229,15 +184,15 @@ export default function KkukoProfile() {
     const getNicknameColor = (equipment: Equipment[]): string => {
         const nikItem = equipment.find(eq => eq.slot === 'NIK');
         if (!nikItem) return '#000000';
-        
+
         const colorKey = nikItem.itemId.toLowerCase().replace('_name', '');
         return NICKNAME_COLORS[colorKey] || '#000000';
     };
 
     const extractColorFromLabel = (description: string): string => {
-        const match = description.match(/<label class='x-([^']+)'><\/label>/);
+        const match = description.match(/<label class='x-([^']+)'>.*?<\/label>/);
         if (!match) return '#000000';
-        
+
         const colorKey = match[1].toLowerCase().replace('_name', '');
         return NICKNAME_COLORS[colorKey] || '#000000';
     };
@@ -248,7 +203,7 @@ export default function KkukoProfile() {
 
     const calculateTotalOptions = () => {
         const totals: Record<string, number> = {};
-        
+
         itemsData.forEach(item => {
             Object.entries(item.options).forEach(([key, value]) => {
                 if (value !== undefined && !isNaN(value)) {
@@ -256,7 +211,7 @@ export default function KkukoProfile() {
                 }
             });
         });
-        
+
         return totals;
     };
 
@@ -305,15 +260,6 @@ export default function KkukoProfile() {
     };
 
     const getSlotName = (slot: string): string => {
-        const slotNames: Record<string, string> = {
-            NIK: '닉네임',
-            CHA: '캐릭터',
-            BAC: '배경',
-            RIN: '반지',
-            MOR: '변신',
-            HAN: '손',
-            BAD: '뱃지'
-        };
         return slotNames[slot] || slot;
     };
 
@@ -337,6 +283,49 @@ export default function KkukoProfile() {
             return `${diffMinutes}분 전`;
         }
     };
+
+    const parseDescriptionWithColors = (description: string): React.ReactNode => {
+        const parts: React.ReactNode[] = [];
+        const regex = /<label class='x-([^']+)'>([^<]*)<\/label>/g;
+        let lastIndex = 0;
+        let match;
+        let key = 0;
+
+        while ((match = regex.exec(description)) !== null) {
+            // Add text before the label
+            if (match.index > lastIndex) {
+                parts.push(
+                    <span key={key++}>{description.substring(lastIndex, match.index)}</span>
+                );
+            }
+
+            // Add colored label text
+            const colorKey = match[1].toLowerCase().replace('_name', '');
+            const color = NICKNAME_COLORS[colorKey] || '#000000';
+            const text = match[2];
+
+            parts.push(
+                <span key={key++} style={{ color }}>{text}</span>
+            );
+
+            lastIndex = regex.lastIndex;
+        }
+
+        // Add remaining text
+        if (lastIndex < description.length) {
+            parts.push(
+                <span key={key++}>{description.substring(lastIndex)}</span>
+            );
+        }
+
+        return <>{parts}</>;
+    };
+
+    const lvImgPlaceholder = () => (
+        <div className="absolute inset-0 bg-gray-100 dark:bg-gray-700 rounded flex items-center justify-center z-10">
+            <span className="text-xs text-gray-400 dark:text-gray-500">Lv</span>
+        </div>
+    )
 
     return (
         <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -406,25 +395,42 @@ export default function KkukoProfile() {
                             {/* Right: User Info */}
                             <div className="flex-1 space-y-3">
                                 <div>
-                                    <h2 
+                                    <h2
                                         className="text-3xl font-bold"
                                         style={{ color: getNicknameColor(profileData.equipment) }}
                                     >
                                         {profileData.user.nickname}
                                     </h2>
                                     <p className="text-gray-600 dark:text-gray-400 mt-1">{profileData.user.exordial}</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">ID: {profileData.user.id}</p>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <p className="text-sm text-gray-500 dark:text-gray-400">경험치</p>
                                         <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">{profileData.user.exp.toLocaleString()} EXP</p>
-                                        <p className="text-xs text-gray-400 dark:text-gray-500">경험치 랭킹: #123 (더미 데이터)</p>
+                                        {expRank !== null && (
+                                            <p className="text-xs text-gray-400 dark:text-gray-500">경험치 랭킹: #{expRank.toLocaleString()}</p>
+                                        )}
                                     </div>
 
                                     <div>
                                         <p className="text-sm text-gray-500 dark:text-gray-400">레벨</p>
-                                        <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">Lv. {profileData.user.level}</p>
+                                        <div className="flex items-center gap-2">
+                                            <div className="relative w-8 h-8 flex-shrink-0">
+                                                <TryRenderImg
+                                                    placeholder={lvImgPlaceholder()}
+                                                    url={`/api/kkuko/image?url=https://cdn.kkutu.co.kr/img/kkutu/lv/lv${String(profileData.user.level).padStart(4, '0')}.png`}
+                                                    alt="Level Icon"
+                                                    width={32}
+                                                    height={32}
+                                                    className={`rounded transition-opacity duration-300 ${isLvImgLoading ? 'opacity-0' : 'opacity-100'}`}
+                                                />
+                                            </div>
+                                            <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                                                Lv. {profileData.user.level}
+                                            </p>
+                                        </div>
                                     </div>
 
                                     <div className="col-span-2">
@@ -546,7 +552,7 @@ export default function KkukoProfile() {
                                 const slotName = equipment ? getSlotName(equipment.slot) : '알 수 없음';
                                 const isNikItem = equipment?.slot === 'NIK';
                                 const nikColor = isNikItem ? extractColorFromLabel(item.description) : '#000000';
-                                
+
                                 return (
                                     <div key={item.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                                         <div className="flex gap-4">
@@ -554,10 +560,10 @@ export default function KkukoProfile() {
                                             <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0">
                                                 <span className="text-xs text-gray-400 dark:text-gray-500 text-center">아이템<br />이미지</span>
                                             </div>
-                                            
+
                                             <div className="flex-1">
                                                 <div className="flex items-center gap-2 mb-1">
-                                                    <h4 
+                                                    <h4
                                                         className="font-bold text-lg"
                                                         style={isNikItem ? { color: nikColor } : {}}
                                                     >
@@ -567,7 +573,9 @@ export default function KkukoProfile() {
                                                         {slotName}
                                                     </span>
                                                 </div>
-                                                <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">{item.description}</p>
+                                                <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
+                                                    {parseDescriptionWithColors(item.description)}
+                                                </p>
                                                 <div className="grid grid-cols-2 gap-2">
                                                     {Object.entries(item.options).map(([key, value]) => (
                                                         value !== undefined && (
