@@ -1,3 +1,5 @@
+import KkukoHome from "./KkukoHome";
+
 export async function generateMetadata() {
 	return {
 		title: "끄코 유틸리티 - 끄코 정보",
@@ -11,4 +13,8 @@ export async function generateMetadata() {
 			locale: "ko_KR",
 		},
 	};
+}
+
+export default function KkukoPage() {
+	return <KkukoHome />;
 }

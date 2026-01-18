@@ -136,10 +136,10 @@ Response:
         updatedAt: number,
         group: string,
         options: {
-            gEXP?: number,
-            hEXP?: number,
-            gMNY?: number,
-            hMNY?: number,
+            gEXP?: number, // 획득 경험치
+            hEXP?: number, // 분당 추가 경험치
+            gMNY?: number, // 획득 핑
+            hMNY?: number, // 분당 추가 핑
             [key: string]: number
         }
     },
