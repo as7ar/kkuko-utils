@@ -67,7 +67,7 @@ export interface IGetManager{
     session(): Promise<{data: {session: Session}, error: null} | {data: { session: null}, error: AuthError} | { data: {session: null}, error: null}>;
     usersByNickname(userName: string): Promise<PostgrestSingleResponse<user[]>>;
     usersLikeByNickname(q: string): Promise<PostgrestSingleResponse<user[]>>;
-    userByNickname(nicknmae: string): Promise<PostgrestSingleResponse<user | null>>;
+    userByNickname(nickname: string): Promise<PostgrestSingleResponse<user | null>>;
     monthlyConRankByUserId(userId: string): Promise<PostgrestSingleResponse<number>>;
     monthlyContributionsByUserId(userId: string): Promise<PostgrestSingleResponse<Database['public']['Tables']['user_month_contributions']['Row'][]>>
     starredDocsById(userId: string): Promise<PostgrestSingleResponse<(user_star_docs & {docs: docs})[]>>;
@@ -86,7 +86,7 @@ export interface IGetManager{
     firstWordCountByLetters(letter: string): Promise<number>;
     lastWordCountByLetters(letter: string): Promise<number>;
     wordsByQuery(query: string): Promise<{data: string[], error: null} | {data: null; error: PostgrestError}>;
-    logsByFillter({filterState, filterType, from, to}:{filterState?: "approved" | "rejected" | "pending" | "all", filterType: "delete" | "add" | "all", from: number, to: number}): Promise<PostgrestSingleResponse<(log & {make_by_user: { nickname: string; } | null; processed_by_user: { nickname: string | null } | null;})[]>>
+    logsByFilter({filterState, filterType, from, to}:{filterState?: "approved" | "rejected" | "pending" | "all", filterType: "delete" | "add" | "all", from: number, to: number}): Promise<PostgrestSingleResponse<(log & {make_by_user: { nickname: string; } | null; processed_by_user: { nickname: string | null } | null;})[]>>
     docsLogsByFilter({ docsName, logType, from, to }: { docsName?: string; logType: 'add' | 'delete' | 'all'; from: number; to: number; }): Promise<PostgrestSingleResponse<(docs_log & { docs: docs; users: { nickname: string } | null })[]>>;
     notice(): Promise<PostgrestSingleResponse<notification | null>>;
     wordsThemesByWordId(wordIds: number[]): Promise<PostgrestSingleResponse<{word_id: number, themes: theme}[]>>;
