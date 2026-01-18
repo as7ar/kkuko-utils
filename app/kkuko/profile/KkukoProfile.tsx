@@ -12,41 +12,7 @@ import {
 } from '../profile/api';
 import TryRenderImg from './TryRenderImg';
 import { Equipment, ItemInfo, KkukoRecord, Mode, ProfileData } from '@/types/kkuko.types'
-
-
-// Nickname color mapping
-const NICKNAME_COLORS: Record<string, string> = {
-    red: '#FF3333',
-    orange: '#FFA533',
-    green: '#43C227',
-    blue: '#2F77D9',
-    indigo: '#1C18B9',
-    purple: '#A939CC',
-    pink: '#F15F9A',
-    gray: '#616161',
-    mint: '#33AF8E',
-    wine: '#971145',
-    cyangreen: '#1D5740',
-    brown: '#613B3B',
-};
-
-// Option name mapping
-const OPTION_NAMES: Record<string, string> = {
-    gEXP: '획득 경험치',
-    hEXP: '분당 추가 경험치',
-    gMNY: '획득 핑',
-    hMNY: '분당 추가 핑'
-};
-
-const slotNames: Record<string, string> = {
-    NIK: '닉네임',
-    CHA: '캐릭터',
-    BAC: '배경',
-    RIN: '반지',
-    MOR: '변신',
-    HAN: '손',
-    BAD: '뱃지'
-};
+import { NICKNAME_COLORS, OPTION_NAMES, SLOT_NAMES } from './const';
 
 export default function KkukoProfile() {
     const router = useRouter();
@@ -62,7 +28,6 @@ export default function KkukoProfile() {
     const [showItemModal, setShowItemModal] = useState(false);
     const [totalUserCount, setTotalUserCount] = useState<number>(0);
     const [expRank, setExpRank] = useState<number | null>(null);
-    const [isLvImgLoading, setIsLvImgLoading] = useState(true);
 
     // Load modes on mount
     useEffect(() => {
@@ -260,7 +225,7 @@ export default function KkukoProfile() {
     };
 
     const getSlotName = (slot: string): string => {
-        return slotNames[slot] || slot;
+        return SLOT_NAMES[slot] || slot;
     };
 
     const getOptionName = (key: string): string => {
@@ -424,7 +389,7 @@ export default function KkukoProfile() {
                                                     alt="Level Icon"
                                                     width={32}
                                                     height={32}
-                                                    className={`rounded transition-opacity duration-300 ${isLvImgLoading ? 'opacity-0' : 'opacity-100'}`}
+                                                    className={`rounded transition-opacity duration-300`}
                                                 />
                                             </div>
                                             <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
@@ -485,7 +450,7 @@ export default function KkukoProfile() {
                             {Object.entries(calculateTotalOptions()).map(([key, value]) => (
                                 <div key={key} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
                                     <p className="text-sm text-gray-500 dark:text-gray-400">{getOptionName(key)}</p>
-                                    <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">{value > 0 ? '+' : ''}{formatNumber(value)}</p>
+                                    <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">{value > 0 ? '+' : ''}{formatNumber(value)}{key[0]==='g' ? '%p' : ''}</p>
                                 </div>
                             ))}
                         </div>
@@ -581,7 +546,7 @@ export default function KkukoProfile() {
                                                         value !== undefined && (
                                                             <div key={key} className="bg-gray-50 dark:bg-gray-700 rounded px-3 py-2">
                                                                 <span className="text-sm text-gray-600 dark:text-gray-400">{getOptionName(key)}: </span>
-                                                                <span className="font-semibold text-gray-900 dark:text-gray-100">{value > 0 ? '+' : ''}{formatNumber(value)}</span>
+                                                                <span className="font-semibold text-gray-900 dark:text-gray-100">{value > 0 ? '+' : ''}{formatNumber(value)}{key[0]==='g' ? '%p' : ''}</span>
                                                             </div>
                                                         )
                                                     ))}

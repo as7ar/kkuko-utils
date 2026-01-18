@@ -59,7 +59,7 @@ export default function TryRenderImg({
 					height={height}
 					className={className}
 					onError={handleError}
-					onLoadingComplete={onLoad}
+					onLoad={onLoad}
 				/>
 			) : (
 				<div style={{ position: "relative" }} className={className}>

@@ -4,11 +4,16 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const imageUrl = searchParams.get("url");
 
+  const controller = new AbortController();
+  const signal = controller.signal;
+
+  const timer = setTimeout(() => controller.abort(), 5000);
+
   if (!imageUrl) {
     return new Response("Missing image url", { status: 400 });
   }
 
-  const imageResponse = await fetch(imageUrl);
+  const imageResponse = await fetch(imageUrl, { signal }).finally(() => clearTimeout(timer));
 
   if (!imageResponse.ok) {
     return new Response("Failed to fetch image", {
