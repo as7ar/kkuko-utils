@@ -612,7 +612,7 @@ const ToolSector = ({ fileContent, setFileContent, setLineCount, setErrorModalVi
             setLineCount(updatedContent.split("\n").length);
         } catch (err) {
             if (err instanceof Error) {
-                seterrorModalView({
+                setErrorModalView({
                     ErrName: err.name,
                     ErrMessage: err.message,
                     ErrStackRace: err.stack,
@@ -620,7 +620,7 @@ const ToolSector = ({ fileContent, setFileContent, setLineCount, setErrorModalVi
                 });
 
             } else {
-                seterrorModalView({
+                setErrorModalView({
                     ErrName: null,
                     ErrMessage: null,
                     ErrStackRace: err as string,
