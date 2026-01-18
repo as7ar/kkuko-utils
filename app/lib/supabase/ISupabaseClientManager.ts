@@ -133,4 +133,5 @@ export interface ISupabaseClientManager {
     loginByGoogle(originUrl: string): Promise<OAuthResponse>;
     onAuthStateChange(func: (session: Session | null) => Promise<void>): {data: {subscription: Subscription}}
     logout(): Promise<void>;
+    getJWT(): Promise<string | null>;
 }

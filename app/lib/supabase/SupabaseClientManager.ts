@@ -917,4 +917,9 @@ export class SupabaseClientManager implements ISupabaseClientManager {
             .from('public_img')
             .getPublicUrl(path);
     }
+
+    async getJWT(){
+        const { data: { session } } = await this.supabase.auth.getSession();
+        return session?.access_token ?? null;
+    }
 }

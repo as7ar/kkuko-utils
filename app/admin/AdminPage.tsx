@@ -105,13 +105,13 @@ const AdminDashboard = () => {
             borderColor: 'border-orange-200'
         },
         {
-            title: '사용자 관리',
-            description: '등록된 사용자들의 정보와 기여도를 관리합니다',
-            icon: Users,
-            path: '/admin/users',
-            color: 'text-indigo-600',
-            bgColor: 'bg-indigo-50 hover:bg-indigo-100',
-            borderColor: 'border-indigo-200'
+            title: 'api-server 관리',
+            description: 'api-server 관련 주요 기능들을 관리합니다',
+            icon: Activity,
+            path: '/admin/api-server',
+            color: 'text-yellow-600',
+            bgColor: 'bg-yellow-50 hover:bg-yellow-100',
+            borderColor: 'border-yellow-200'
         }
     ];
 
