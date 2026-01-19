@@ -295,6 +295,12 @@ export default function KkukoProfile() {
         </div>
     )
 
+    const itemImgPlaceholder = () => (
+        <div className="absolute inset-0 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+            <span className="text-xs text-gray-400 dark:text-gray-500 text-center">아이템<br />이미지</span>
+        </div>
+    )
+
     const characterLayers = useMemo(() => {
         if (!profileData) return [];
 
@@ -611,7 +617,7 @@ export default function KkukoProfile() {
             {showItemModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50 p-4">
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-                        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex justify-between items-center">
+                        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex justify-between items-center z-30">
                             <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">장착 아이템 목록</h3>
                             <button
                                 onClick={() => setShowItemModal(false)}
@@ -620,20 +626,41 @@ export default function KkukoProfile() {
                                 ×
                             </button>
                         </div>
-                        <div className="p-6 space-y-4">
+                        <div className="p-6 space-y-4 relative">
                             {itemsData.map((item) => {
                                 const equipment = profileData?.equipment.find(eq => eq.itemId === item.id);
                                 const slotName = equipment ? getSlotName(equipment.slot) : '알 수 없음';
                                 const isNikItem = equipment?.slot === 'NIK';
                                 const nikColor = isNikItem ? extractColorFromLabel(item.description) : '#000000';
 
+                                // Get the image group from equipment slot
+                                const getImageGroup = () => {
+                                    if (!equipment) return null;
+                                    if (equipment.slot === 'NIK') return null; // No image for nickname items
+                                    if (equipment.slot === 'BDG') return 'badge';
+                                    if (equipment.slot.startsWith('Ml') || equipment.slot.startsWith('Mr')) return 'hand';
+                                    // Remove 'M' prefix from slot name (e.g., 'Mavatar' -> 'avatar')
+                                    return equipment.slot.startsWith('M') ? equipment.slot.substring(1).toLowerCase() : equipment.slot.toLowerCase();
+                                };
+
+                                const imageGroup = getImageGroup();
+
                                 return (
                                     <div key={item.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                                         <div className="flex gap-4">
-                                            {/* Item Image Placeholder */}
-                                            <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0">
-                                                <span className="text-xs text-gray-400 dark:text-gray-500 text-center">아이템<br />이미지</span>
-                                            </div>
+                                            {/* Item Image */}
+                                            {imageGroup && (
+                                                <div className="relative w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                                    <TryRenderImg
+                                                        placeholder={itemImgPlaceholder()}
+                                                        url={`/api/kkuko/image?url=https://cdn.kkutu.co.kr/img/kkutu/moremi/${imageGroup}/${item.id}.png`}
+                                                        alt={item.name}
+                                                        width={80}
+                                                        height={80}
+                                                        className="transition-opacity duration-300"
+                                                    />
+                                                </div>
+                                            )}
 
                                             <div className="flex-1">
                                                 <div className="flex items-center gap-2 mb-1">
