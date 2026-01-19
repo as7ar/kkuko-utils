@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Search } from 'lucide-react';
 import {
@@ -28,6 +28,7 @@ export default function KkukoProfile() {
     const [showItemModal, setShowItemModal] = useState(false);
     const [totalUserCount, setTotalUserCount] = useState<number>(0);
     const [expRank, setExpRank] = useState<number | null>(null);
+    const [imgLoadedCount, setImgLoadedCount] = useState(0);
 
     // Load modes on mount
     useEffect(() => {
@@ -49,6 +50,7 @@ export default function KkukoProfile() {
             setSearchType('id');
             fetchProfile(id, 'id');
         }
+        setImgLoadedCount(0);
     }, [searchParams]);
 
     const fetchModes = async () => {
@@ -138,6 +140,7 @@ export default function KkukoProfile() {
         const queryParam = searchType === 'nick' ? 'nick' : 'id';
         router.push(`/kkuko/profile?${queryParam}=${encodeURIComponent(searchQuery)}`);
         fetchProfile(searchQuery, searchType);
+        setImgLoadedCount(0);
     };
 
     const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -148,18 +151,18 @@ export default function KkukoProfile() {
 
     const getNicknameColor = (equipment: Equipment[]): string => {
         const nikItem = equipment.find(eq => eq.slot === 'NIK');
-        if (!nikItem) return '#000000';
+        if (!nikItem) return localStorage.getItem('theme') === 'dark' ? '#FFFFFF' : '#000000';
 
         const colorKey = nikItem.itemId.toLowerCase().replace('_name', '');
-        return NICKNAME_COLORS[colorKey] || '#000000';
+        return NICKNAME_COLORS[colorKey] || (localStorage.getItem('theme') === 'dark' ? '#FFFFFF' : '#000000');
     };
 
     const extractColorFromLabel = (description: string): string => {
         const match = description.match(/<label class='x-([^']+)'>.*?<\/label>/);
-        if (!match) return '#000000';
+        if (!match) return localStorage.getItem('theme') === 'dark' ? '#FFFFFF' : '#000000';
 
         const colorKey = match[1].toLowerCase().replace('_name', '');
-        return NICKNAME_COLORS[colorKey] || '#000000';
+        return NICKNAME_COLORS[colorKey] || (localStorage.getItem('theme') === 'dark' ? '#FFFFFF' : '#000000');
     };
 
     const formatNumber = (num: number): string => {
@@ -292,6 +295,91 @@ export default function KkukoProfile() {
         </div>
     )
 
+    const characterLayers = useMemo(() => {
+        if (!profileData) return [];
+
+        const layerOrder = ['back', 'avatar', 'eye', 'mouth', 'facedeco', 'eyedeco', 'shoes', 'clothes', 'dressdeco', 'head', 'hairdeco', 'hand', 'front', 'badge'];
+        
+        // Group items by their slot for proper identification
+        const itemsBySlot: Record<string, ItemInfo> = {};
+        const currentItems = itemsData || [];
+
+        currentItems.forEach(item => {
+            const equipment = profileData?.equipment.find(eq => eq.itemId === item.id);
+            if (equipment && equipment.slot !== 'NIK' && equipment.slot !== 'BDG') {
+                itemsBySlot[equipment.slot] = item;
+            } else if (equipment && equipment.slot === 'BDG') {
+                itemsBySlot['badge'] = item;
+            }
+        });
+
+        // Ensure avatar exists, if not add default
+        if (!itemsBySlot['Mavatar']) {
+            itemsBySlot['Mavatar'] = {
+                id: 'def',
+                name: 'def',
+                description: '',
+                updatedAt: 0,
+                group: 'avatar',
+                options: {}
+            };
+        }
+
+        // Render layers in order
+        const layers: { key: string; url: string; alt: string; className?: string }[] = [];
+        
+        layerOrder.forEach((group, index) => {
+            // Check for left hand and right hand separately if group is 'hand'
+            if (group === 'hand') {
+                // Render left hand (Mlhand)
+                const leftHandItem = itemsBySlot['Mlhand'];
+                if (leftHandItem) {
+                    const imageName = leftHandItem.id;
+                    const imageUrl = `/api/kkuko/image?url=https://cdn.kkutu.co.kr/img/kkutu/moremi/hand/${imageName}.png`;
+                    
+                    layers.push({
+                        key: `hand-left-${index}`,
+                        url: imageUrl,
+                        alt: "left hand layer",
+                        className: "transition-opacity duration-300"
+                    });
+                }
+                
+                // Render right hand (Mrhand)
+                const rightHandItem = itemsBySlot['Mrhand'];
+                if (rightHandItem) {
+                    const imageName = rightHandItem.id;
+                    const imageUrl = `/api/kkuko/image?url=https://cdn.kkutu.co.kr/img/kkutu/moremi/hand/${imageName}.png`;
+                    
+                    layers.push({
+                        key: `hand-right-${index}`,
+                        url: imageUrl,
+                        alt: "right hand layer",
+                        className: "transition-opacity duration-300 scale-x-[-1]"
+                    });
+                }
+            } else {
+                // For other groups, check with M prefix
+                const slotKey = `M${group}`;
+                const item = itemsBySlot[slotKey] || itemsBySlot[group];
+                
+                if (item) {
+                    const imageName = item.name === 'def' ? 'def' : item.id;
+                    const imageUrl = `/api/kkuko/image?url=https://cdn.kkutu.co.kr/img/kkutu/moremi/${group}/${imageName}.png`;
+
+                    layers.push({
+                        key: `${group}-${index}`,
+                        url: imageUrl,
+                        alt: `${group} layer`,
+                        className: "transition-opacity duration-300"
+                    });
+                }
+            }
+        });
+        
+        return layers;
+    }, [profileData, itemsData]);
+
     return (
         <div className="container mx-auto px-4 py-8 max-w-6xl">
             {/* Title Section */}
@@ -352,9 +440,30 @@ export default function KkukoProfile() {
                     {/* User Profile Section */}
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
                         <div className="flex gap-6">
-                            {/* Left: Character Image Placeholder */}
-                            <div className="w-48 h-48 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                                <span className="text-gray-400 dark:text-gray-500">캐릭터 이미지</span>
+                            {/* Left: Character Image */}
+                            <div className="relative w-48 h-48 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden flex-shrink-0">
+                                {imgLoadedCount < characterLayers.length && (
+                                    <div className="absolute inset-0 z-20 flex items-center justify-center bg-gray-100 dark:bg-gray-700">
+                                        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                                    </div>
+                                )}
+                                {characterLayers.map((layer) => (
+                                    <div
+                                        key={layer.key}
+                                        className="absolute inset-0 flex items-center justify-center"
+                                    >
+                                        <TryRenderImg
+                                            placeholder={<div className="w-48 h-48" />}
+                                            url={layer.url}
+                                            alt={layer.alt}
+                                            width={192}
+                                            height={192}
+                                            className={layer.className}
+                                            hanldeLoad={() => setImgLoadedCount(prev => prev + 1)}
+                                            onFailure={() => setImgLoadedCount(prev => prev + 1)}
+                                        />
+                                    </div>
+                                ))}
                             </div>
 
                             {/* Right: User Info */}

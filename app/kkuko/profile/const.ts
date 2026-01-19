@@ -38,4 +38,5 @@ export const SLOT_NAMES: Record<string, string> = {
     Mmouth: '입',
     Mclothes: '옷',
     Meye: '눈',
+    pbdg: '배지'
 };

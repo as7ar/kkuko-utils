@@ -13,6 +13,10 @@ export async function GET(req: NextRequest) {
     return new Response("Missing image url", { status: 400 });
   }
 
+  if (!imageUrl.startsWith("https://cdn.kkutu.co.kr/img/")) {
+    return new Response("Invalid image url", { status: 400 });
+  }
+
   const imageResponse = await fetch(imageUrl, { signal }).finally(() => clearTimeout(timer));
 
   if (!imageResponse.ok) {

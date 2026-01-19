@@ -11,6 +11,8 @@ type Props = {
 	height?: number;
 	className?: string;
 	maxRetries?: number;
+	hanldeLoad?: (event: React.SyntheticEvent<HTMLImageElement, Event>) => void;
+	onFailure?: () => void;
 };
 
 export default function TryRenderImg({
@@ -20,6 +22,8 @@ export default function TryRenderImg({
 	width,
 	height,
 	className,
+	hanldeLoad,
+	onFailure,
 	maxRetries = 3,
 }: Props) {
 	const [attempt, setAttempt] = useState(0);
@@ -40,11 +44,13 @@ export default function TryRenderImg({
 			setSrc(`${url}${separator}r=${next}&ts=${Date.now()}`);
 		} else {
 			setFailed(true);
+			onFailure?.();
 		}
 	};
 
-	const onLoad = () => {
+	const onLoad = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
 		if (failed) setFailed(false);
+		hanldeLoad?.(e);
 	};
 
 	if (failed) return <>{placeholder ?? null}</>;
@@ -70,7 +76,7 @@ export default function TryRenderImg({
 						sizes="100vw"
 						style={{ objectFit: "cover" }}
 						onError={handleError}
-						onLoadingComplete={onLoad}
+						onLoad={onLoad}
 					/>
 				</div>
 			)}

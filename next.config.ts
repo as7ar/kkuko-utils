@@ -18,6 +18,14 @@ const nextConfig: NextConfig = {
         pathname: '/img/**',
       },
     ],
+    localPatterns: [
+      {
+        pathname: '/api/kkuko/image',
+      },
+      {
+        pathname: '/img/**',
+      },
+    ],
   },
 };
 
