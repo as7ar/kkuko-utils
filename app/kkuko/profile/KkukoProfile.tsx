@@ -166,7 +166,7 @@ export default function KkukoProfile() {
     };
 
     const formatNumber = (num: number): string => {
-        return num.toString();
+        return (num / 1000).toString();
     };
 
     const calculateTotalOptions = () => {
@@ -175,7 +175,7 @@ export default function KkukoProfile() {
         itemsData.forEach(item => {
             Object.entries(item.options).forEach(([key, value]) => {
                 if (value !== undefined && !isNaN(value)) {
-                    totals[key] = (totals[key] || 0) + Number(value);
+                    totals[key] = (totals[key] || 0) + Number(value) * 1000;
                 }
             });
         });
@@ -400,7 +400,7 @@ export default function KkukoProfile() {
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        onKeyPress={handleKeyPress}
+                        onKeyDown={handleKeyPress}
                         placeholder="유저 검색..."
                         className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
@@ -682,7 +682,7 @@ export default function KkukoProfile() {
                                                         value !== undefined && (
                                                             <div key={key} className="bg-gray-50 dark:bg-gray-700 rounded px-3 py-2">
                                                                 <span className="text-sm text-gray-600 dark:text-gray-400">{getOptionName(key)}: </span>
-                                                                <span className="font-semibold text-gray-900 dark:text-gray-100">{value > 0 ? '+' : ''}{formatNumber(value)}{key[0]==='g' ? '%p' : ''}</span>
+                                                                <span className="font-semibold text-gray-900 dark:text-gray-100">{value > 0 ? '+' : ''}{formatNumber(value * 1000)}{key[0]==='g' ? '%p' : ''}</span>
                                                             </div>
                                                         )
                                                     ))}
