@@ -23,6 +23,7 @@
   ],
   "discord.enabled": true,
   "chat.tools.terminal.autoApprove": {
-    "npx jest": true
+    "npx jest": true,
+    "npm run lint": true
   }
 }

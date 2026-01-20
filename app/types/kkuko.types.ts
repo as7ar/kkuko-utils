@@ -67,6 +67,29 @@ export interface Mode {
     group: string;
 }
 
+export interface RankingEntry {
+    rank: number;
+    userRecord: {
+        id: number;
+        userId: string;
+        modeId: string;
+        total: number;
+        win: number;
+        exp: number;
+        playtime: number;
+    };
+    userInfo: {
+        id: string;
+        nickname: string;
+        exp: number;
+        observedAt: string;
+        exordial: string;
+        level: number;
+    };
+}
+
+export type RankingOption = 'win' | 'exp';
+
 export function isSpecialOptions(obj: unknown): obj is SpecialOptions {
     return !!obj && typeof obj === 'object' &&
         'date' in obj && typeof obj.date === 'number' &&
