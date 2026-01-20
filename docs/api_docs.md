@@ -170,6 +170,7 @@ Response:
 Parameters:
 - mode: 랭킹을 조회할 모드 ID
 - page: 페이지 번호 (기본값 1)
+- option: 랭킹 옵션 (win 승리수 기준, exp 경험치 기준)
 
 Response:
 ```ts

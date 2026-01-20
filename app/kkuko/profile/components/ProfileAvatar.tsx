@@ -19,26 +19,13 @@ export default function ProfileAvatar({ profileData, itemsData }: ProfileAvatarP
         const itemsBySlot: Record<string, ItemInfo> = {};
         const currentItems = itemsData || [];
 
-        currentItems.forEach(item => {
-            const equipment = profileData.equipment.find(eq => eq.itemId === item.id);
-            if (equipment && equipment.slot !== 'NIK' && equipment.slot !== 'BDG') {
-                itemsBySlot[equipment.slot] = item;
-            } else if (equipment && equipment.slot === 'BDG') {
-                itemsBySlot['badge'] = item;
-            }
+        profileData.equipment.forEach(equipment => {
+            if (equipment.slot === 'NIK') return;
+            const item = currentItems.find(i => i.id === equipment.itemId);
+            if (!item) return;
+            if (equipment.slot === 'BDG') itemsBySlot['badge'] = item;
+            else itemsBySlot[equipment.slot] = item;
         });
-
-        // Ensure avatar exists, if not add default
-        if (!itemsBySlot['Mavatar']) {
-            itemsBySlot['Mavatar'] = {
-                id: 'def',
-                name: 'def',
-                description: '',
-                updatedAt: 0,
-                group: 'avatar',
-                options: {}
-            };
-        }
 
         // Render layers in order
         const layers: { key: string; url: string; alt: string; className?: string }[] = [];
