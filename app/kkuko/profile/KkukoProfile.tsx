@@ -52,6 +52,7 @@ export default function KkukoProfile() {
                 loading={loading}
                 recentSearches={recentSearches}
                 onRemoveRecentSearch={removeFromRecentSearches}
+                onSearch={fetchProfile}
             />
 
             {/* Loading State */}

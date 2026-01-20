@@ -4,14 +4,16 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { SearchHistoryItem } from '../hooks/useRecentSearches';
+import { normalizeHangul } from '@/app/lib/hangulUtils';
 
 interface ProfileSearchProps {
     loading: boolean;
     recentSearches: SearchHistoryItem[];
     onRemoveRecentSearch: (query: string, type: 'nick' | 'id') => void;
+    onSearch: (query: string, type: 'nick' | 'id') => void;
 }
 
-export default function ProfileSearch({ loading, recentSearches, onRemoveRecentSearch }: ProfileSearchProps) {
+export default function ProfileSearch({ loading, recentSearches, onRemoveRecentSearch, onSearch }: ProfileSearchProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
     
@@ -61,16 +63,23 @@ export default function ProfileSearch({ loading, recentSearches, onRemoveRecentS
     const handleSearch = () => {
         if (!searchQuery.trim()) return;
 
+        const trimmed = searchQuery.trim();
+        // Call parent fetch immediately so UI shows loading without waiting for navigation
+        onSearch(trimmed, searchType);
+
         const queryParam = searchType === 'nick' ? 'nick' : 'id';
-        router.push(`/kkuko/profile?${queryParam}=${encodeURIComponent(searchQuery)}`);
+        // update URL without adding a history entry
+        router.replace(`/kkuko/profile?${queryParam}=${encodeURIComponent(trimmed)}`);
         setShowDropdown(false);
     };
 
     const handleRecentSearchClick = (search: SearchHistoryItem) => {
         setSearchQuery(search.query);
         setSearchType(search.type);
+        // call parent fetch immediately to reduce perceived latency
+        onSearch(search.query, search.type);
         const queryParam = search.type === 'nick' ? 'nick' : 'id';
-        router.push(`/kkuko/profile?${queryParam}=${encodeURIComponent(search.query)}`);
+        router.replace(`/kkuko/profile?${queryParam}=${encodeURIComponent(search.query)}`);
         setShowDropdown(false);
     };
 
@@ -84,10 +93,15 @@ export default function ProfileSearch({ loading, recentSearches, onRemoveRecentS
         if (!searchQuery.trim()) {
             return recentSearches;
         }
-        return recentSearches.filter(search => 
-            search.query.toLowerCase().startsWith(searchQuery.toLowerCase()) &&
-            search.type === searchType
-        );
+
+        const normalizedQuery = normalizeHangul(searchQuery);
+
+        return recentSearches.filter(search => {
+            if (search.type !== searchType) return false;
+
+            const normalizedTarget = normalizeHangul(search.query);
+            return normalizedTarget.startsWith(normalizedQuery);
+        });
     };
 
     return (

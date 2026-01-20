@@ -86,6 +86,8 @@ export function isHangul(s: string): boolean {
     return hangulRegex.test(s);
 }
 
+export const normalizeHangul = (text: string) => disassemble(text).toLowerCase();
+
 /**
  * @deprecated Use deumLaw instead of dl
  */
