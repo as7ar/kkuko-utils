@@ -18,6 +18,16 @@ const eslintConfig = [
       'jest.config.ts',
       'jest.setup.ts',
     ],
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { 
+          "argsIgnorePattern": "^_",
+          "varsIgnorePattern": "^_",
+          "caughtErrorsIgnorePattern": "^_"
+        }
+      ]
+    }
   },
   // ✅ 기존 설정
   ...compat.config({
