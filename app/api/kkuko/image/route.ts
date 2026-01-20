@@ -1,5 +1,7 @@
 import { NextRequest } from "next/server";
 
+export const runtime = 'edge';
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const imageUrl = searchParams.get("url");
@@ -31,7 +33,7 @@ export async function GET(req: NextRequest) {
   return new Response(buffer, {
     headers: {
       "Content-Type": contentType,
-      "Cache-Control": "public, max-age=86400",
+      "Cache-Control": "public, s-maxage=31536000, max-age=86400, stale-while-revalidate=59",
     },
   });
 }
