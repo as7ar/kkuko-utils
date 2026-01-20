@@ -67,8 +67,8 @@ export interface Mode {
     group: string;
 }
 
-export function isSpecialOptions(obj: any): obj is SpecialOptions {
-    return obj && typeof obj === 'object' &&
+export function isSpecialOptions(obj: unknown): obj is SpecialOptions {
+    return !!obj && typeof obj === 'object' &&
         'date' in obj && typeof obj.date === 'number' &&
         'after' in obj && typeof obj.after === 'object' &&
         'before' in obj && typeof obj.before === 'object';
