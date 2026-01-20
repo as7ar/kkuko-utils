@@ -11,7 +11,7 @@ import {
     fetchExpRank as fetchExpRankApi
 } from '../profile/api';
 import TryRenderImg from './TryRenderImg';
-import { Equipment, ItemInfo, KkukoRecord, Mode, ProfileData } from '@/types/kkuko.types'
+import { Equipment, ItemInfo, ItemOption, KkukoRecord, Mode, ProfileData, SpecialOptions, isSpecialOptions } from '@/types/kkuko.types'
 import { NICKNAME_COLORS, OPTION_NAMES, SLOT_NAMES } from './const';
 
 export default function KkukoProfile() {
@@ -248,11 +248,20 @@ export default function KkukoProfile() {
         const totals: Record<string, number> = {};
 
         itemsData.forEach(item => {
-            Object.entries(item.options).forEach(([key, value]) => {
-                if (value !== undefined && !isNaN(value)) {
-                    totals[key] = (totals[key] || 0) + Number(value) * 1000;
-                }
-            });
+            if (isSpecialOptions(item.options)) {
+                const relevantOptions = Date.now() >= item.options.date ? item.options.after : item.options.before;
+                Object.entries(relevantOptions).forEach(([key, value]) => {
+                    if (value !== undefined && typeof value === 'number' && !isNaN(value)) {
+                        totals[key] = (totals[key] || 0) + Number(value) * 1000;
+                    }
+                });
+            } else {
+                Object.entries(item.options).forEach(([key, value]) => {
+                    if (value !== undefined && typeof value === 'number' && !isNaN(value)) {
+                        totals[key] = (totals[key] || 0) + Number(value) * 1000;
+                    }
+                });
+            }
         });
 
         return totals;
@@ -469,6 +478,26 @@ export default function KkukoProfile() {
         
         return layers;
     }, [profileData, itemsData]);
+
+    const itemOptionsUI = (options: ItemOption | SpecialOptions) => {
+        const itemOptionUI = (key: string, value: number) => (
+            <div key={key} className="bg-gray-50 dark:bg-gray-700 rounded px-3 py-2">
+                <span className="text-sm text-gray-600 dark:text-gray-400">{getOptionName(key)}: </span>
+                <span className="font-semibold text-gray-900 dark:text-gray-100">{value > 0 ? '+' : ''}{formatNumber(value * 1000)}{key[0]==='g' ? '%p' : ''}</span>
+            </div>
+        )
+
+        if (isSpecialOptions(options)) {
+            const relevantOptions = Date.now() >= options.date ? options.after : options.before;
+            return Object.entries(relevantOptions).filter(([k, v]) => v !== undefined && typeof v === 'number').map(([k, v]) =>
+                itemOptionUI(k, v as number)
+            );
+        } else {
+            return Object.entries(options).filter(([k, v]) => v !== undefined && typeof v === 'number').map(([k, v]) =>
+                itemOptionUI(k, v as number)
+            );
+        }
+    }
 
     return (
         <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -863,14 +892,7 @@ export default function KkukoProfile() {
                                                     {parseDescriptionWithColors(item.description)}
                                                 </p>
                                                 <div className="grid grid-cols-2 gap-2">
-                                                    {Object.entries(item.options).map(([key, value]) => (
-                                                        value !== undefined && (
-                                                            <div key={key} className="bg-gray-50 dark:bg-gray-700 rounded px-3 py-2">
-                                                                <span className="text-sm text-gray-600 dark:text-gray-400">{getOptionName(key)}: </span>
-                                                                <span className="font-semibold text-gray-900 dark:text-gray-100">{value > 0 ? '+' : ''}{formatNumber(value * 1000)}{key[0]==='g' ? '%p' : ''}</span>
-                                                            </div>
-                                                        )
-                                                    ))}
+                                                    {itemOptionsUI(item.options)}
                                                 </div>
                                             </div>
                                         </div>

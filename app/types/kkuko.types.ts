@@ -38,23 +38,38 @@ export interface ProfileData {
     presence: Presence;
 }
 
+export interface ItemOption {
+    gEXP?: number;
+    hEXP?: number;
+    gMNY?: number;
+    hMNY?: number;
+    [key: string]: number | undefined;
+};
+
+export interface SpecialOptions{
+    date: number;
+    after: ItemOption;
+    before: ItemOption;
+}
+
 export interface ItemInfo {
     id: string;
     name: string;
     description: string;
     updatedAt: number;
     group: string;
-    options: {
-        gEXP?: number;
-        hEXP?: number;
-        gMNY?: number;
-        hMNY?: number;
-        [key: string]: number | undefined;
-    };
+    options: ItemOption | SpecialOptions;
 }
 
 export interface Mode {
     modeId: string;
     modeName: string;
     group: string;
+}
+
+export function isSpecialOptions(obj: any): obj is SpecialOptions {
+    return obj && typeof obj === 'object' &&
+        'date' in obj && typeof obj.date === 'number' &&
+        'after' in obj && typeof obj.after === 'object' &&
+        'before' in obj && typeof obj.before === 'object';
 }
