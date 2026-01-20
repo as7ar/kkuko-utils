@@ -379,6 +379,15 @@ export default function KkukoProfile() {
                         alt: `${group} layer`,
                         className: "transition-opacity duration-300"
                     });
+                } else {
+                    const itemId = 'def';
+                    const imageUrl = `/api/kkuko/image?url=https://cdn.kkutu.co.kr/img/kkutu/moremi/${group}/${itemId}.png`;
+                    layers.push({
+                        key: `${group}-${index}`,
+                        url: imageUrl,
+                        alt: `${group} default layer`,
+                        className: "transition-opacity duration-300"
+                    });
                 }
             }
         });
@@ -446,30 +455,66 @@ export default function KkukoProfile() {
                     {/* User Profile Section */}
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
                         <div className="flex gap-6">
-                            {/* Left: Character Image */}
-                            <div className="relative w-48 h-48 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden flex-shrink-0">
-                                {imgLoadedCount < characterLayers.length && (
-                                    <div className="absolute inset-0 z-20 flex items-center justify-center bg-gray-100 dark:bg-gray-700">
-                                        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                            {/* Left: Character Image and Badges */}
+                            <div className="flex flex-col gap-3 flex-shrink-0">
+                                {/* Character Image */}
+                                <div className="relative w-48 h-48 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
+                                    {imgLoadedCount < characterLayers.length && (
+                                        <div className="absolute inset-0 z-20 flex items-center justify-center bg-gray-100 dark:bg-gray-700">
+                                            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                                        </div>
+                                    )}
+                                    {characterLayers.map((layer) => (
+                                        <div
+                                            key={layer.key}
+                                            className="absolute inset-0 flex items-center justify-center"
+                                        >
+                                            <TryRenderImg
+                                                placeholder={<div className="w-48 h-48" />}
+                                                url={layer.url}
+                                                alt={layer.alt}
+                                                width={192}
+                                                height={192}
+                                                className={layer.className}
+                                                hanldeLoad={() => setImgLoadedCount(prev => prev + 1)}
+                                                onFailure={() => setImgLoadedCount(prev => prev + 1)}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Badges (pbdg slot items) */}
+                                {profileData.equipment.filter(eq => eq.slot === 'pbdg').length > 0 && (
+                                    <div className="flex flex-wrap gap-2 w-48">
+                                        {profileData.equipment
+                                            .filter(eq => eq.slot === 'pbdg')
+                                            .map(eq => {
+                                                const item = itemsData.find(i => i.id === eq.itemId);
+                                                if (!item) return null;
+                                                return (
+                                                    <div
+                                                        key={eq.itemId}
+                                                        className="relative group"
+                                                        title={item.name}
+                                                    >
+                                                        <div className="relative w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded flex items-center justify-center overflow-hidden">
+                                                            <TryRenderImg
+                                                                placeholder={<div className="w-10 h-10" />}
+                                                                url={`/api/kkuko/image?url=https://cdn.kkutu.co.kr/img/kkutu/moremi/badge/${item.id}.png`}
+                                                                alt={item.name}
+                                                                width={40}
+                                                                height={40}
+                                                                className="transition-opacity duration-300"
+                                                            />
+                                                        </div>
+                                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                                                            {item.name}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
                                     </div>
                                 )}
-                                {characterLayers.map((layer) => (
-                                    <div
-                                        key={layer.key}
-                                        className="absolute inset-0 flex items-center justify-center"
-                                    >
-                                        <TryRenderImg
-                                            placeholder={<div className="w-48 h-48" />}
-                                            url={layer.url}
-                                            alt={layer.alt}
-                                            width={192}
-                                            height={192}
-                                            className={layer.className}
-                                            hanldeLoad={() => setImgLoadedCount(prev => prev + 1)}
-                                            onFailure={() => setImgLoadedCount(prev => prev + 1)}
-                                        />
-                                    </div>
-                                ))}
                             </div>
 
                             {/* Right: User Info */}
@@ -637,7 +682,7 @@ export default function KkukoProfile() {
                                 const getImageGroup = () => {
                                     if (!equipment) return null;
                                     if (equipment.slot === 'NIK') return null; // No image for nickname items
-                                    if (equipment.slot === 'BDG') return 'badge';
+                                    if (equipment.slot === 'BDG' || equipment.slot === 'pbdg') return 'badge';
                                     if (equipment.slot.startsWith('Ml') || equipment.slot.startsWith('Mr')) return 'hand';
                                     // Remove 'M' prefix from slot name (e.g., 'Mavatar' -> 'avatar')
                                     return equipment.slot.startsWith('M') ? equipment.slot.substring(1).toLowerCase() : equipment.slot.toLowerCase();

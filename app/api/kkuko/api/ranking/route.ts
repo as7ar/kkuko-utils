@@ -29,7 +29,7 @@ export async function GET(request: NextRequest){
                 { status: 404 }
             );
         } else {
-            return NextResponse.json({rank: rankingData.rank, id: rankingData.id});
+            return NextResponse.json({rank: rankingData.rank + 1, id: rankingData.id});
         }
     } catch (error) {
         return NextResponse.json(
