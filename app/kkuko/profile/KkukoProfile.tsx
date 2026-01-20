@@ -29,11 +29,25 @@ export default function KkukoProfile() {
     const [totalUserCount, setTotalUserCount] = useState<number>(0);
     const [expRank, setExpRank] = useState<number | null>(null);
     const [imgLoadedCount, setImgLoadedCount] = useState(0);
+    const [recentSearches, setRecentSearches] = useState<Array<{query: string, type: 'nick' | 'id'}>>([]);
+    const [showDropdown, setShowDropdown] = useState(false);
+    const inputRef = React.useRef<HTMLInputElement>(null);
+    const dropdownRef = React.useRef<HTMLDivElement>(null);
 
-    // Load modes on mount
+    // Load modes and recent searches on mount
     useEffect(() => {
         fetchModes();
         fetchTotalUsers();
+        
+        // Load recent searches from localStorage
+        const saved = localStorage.getItem('kkuko-recent-searches');
+        if (saved) {
+            try {
+                setRecentSearches(JSON.parse(saved));
+            } catch (e) {
+                console.error('Failed to parse recent searches:', e);
+            }
+        }
     }, []);
 
     // Handle URL query parameters
@@ -52,6 +66,25 @@ export default function KkukoProfile() {
         }
         setImgLoadedCount(0);
     }, [searchParams]);
+
+    // Handle click outside to close dropdown
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(event.target as Node) &&
+                inputRef.current &&
+                !inputRef.current.contains(event.target as Node)
+            ) {
+                setShowDropdown(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     const fetchModes = async () => {
         try {
@@ -104,6 +137,9 @@ export default function KkukoProfile() {
 
                 // Fetch exp rank
                 fetchExpRank(result.data.user.id);
+                
+                // Save to recent searches
+                saveToRecentSearches(query, type);
             }
         } catch (err) {
             setError('프로필을 불러오는데 실패했습니다.');
@@ -134,6 +170,34 @@ export default function KkukoProfile() {
         }
     };
 
+    const saveToRecentSearches = (query: string, type: 'nick' | 'id') => {
+        const newSearch = { query, type };
+        const filtered = recentSearches.filter(
+            s => !(s.query === query && s.type === type)
+        );
+        const updated = [newSearch, ...filtered].slice(0, 7);
+        setRecentSearches(updated);
+        localStorage.setItem('kkuko-recent-searches', JSON.stringify(updated));
+    };
+
+    const removeFromRecentSearches = (query: string, type: 'nick' | 'id') => {
+        const updated = recentSearches.filter(
+            s => !(s.query === query && s.type === type)
+        );
+        setRecentSearches(updated);
+        localStorage.setItem('kkuko-recent-searches', JSON.stringify(updated));
+    };
+
+    const getFilteredSearches = () => {
+        if (!searchQuery.trim()) {
+            return recentSearches;
+        }
+        return recentSearches.filter(search => 
+            search.query.toLowerCase().startsWith(searchQuery.toLowerCase()) &&
+            search.type === searchType
+        );
+    };
+
     const handleSearch = () => {
         if (!searchQuery.trim()) return;
 
@@ -141,6 +205,17 @@ export default function KkukoProfile() {
         router.push(`/kkuko/profile?${queryParam}=${encodeURIComponent(searchQuery)}`);
         fetchProfile(searchQuery, searchType);
         setImgLoadedCount(0);
+        setShowDropdown(false);
+    };
+
+    const handleRecentSearchClick = (search: { query: string; type: 'nick' | 'id' }) => {
+        setSearchQuery(search.query);
+        setSearchType(search.type);
+        const queryParam = search.type === 'nick' ? 'nick' : 'id';
+        router.push(`/kkuko/profile?${queryParam}=${encodeURIComponent(search.query)}`);
+        fetchProfile(search.query, search.type);
+        setImgLoadedCount(0);
+        setShowDropdown(false);
     };
 
     const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -379,7 +454,7 @@ export default function KkukoProfile() {
                         alt: `${group} layer`,
                         className: "transition-opacity duration-300"
                     });
-                } else {
+                } else if (group !== 'badge' && item === undefined) {
                     const itemId = 'def';
                     const imageUrl = `/api/kkuko/image?url=https://cdn.kkutu.co.kr/img/kkutu/moremi/${group}/${itemId}.png`;
                     layers.push({
@@ -403,16 +478,58 @@ export default function KkukoProfile() {
             </h1>
 
             {/* Search Section */}
-            <div className="mb-8">
+            <div className="mb-8 relative">
                 <div className="flex gap-2 items-center">
-                    <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        onKeyDown={handleKeyPress}
-                        placeholder="유저 검색..."
-                        className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
+                    <div className="flex-1 relative">
+                        <input
+                            ref={inputRef}
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onKeyDown={handleKeyPress}
+                            onFocus={() => setShowDropdown(true)}
+                            placeholder="유저 검색..."
+                            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        
+                        {/* Dropdown */}
+                        {showDropdown && recentSearches.length > 0 && getFilteredSearches().length > 0 && (
+                            <div
+                                ref={dropdownRef}
+                                className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-64 overflow-y-auto z-50"
+                            >
+                                <div className="py-2">
+                                    <div className="px-3 py-1.5 text-xs text-gray-500 dark:text-gray-400 font-semibold">
+                                        최근 검색
+                                    </div>
+                                    {getFilteredSearches().map((search, index) => (
+                                        <div
+                                            key={index}
+                                            className="flex items-center justify-between px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer group"
+                                        >
+                                            <button
+                                                onClick={() => handleRecentSearchClick(search)}
+                                                className="flex-1 text-left flex items-center gap-2"
+                                            >
+                                                <Search className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                                                <span className="text-gray-900 dark:text-gray-100">{search.query}</span>
+                                                <span className="text-xs text-gray-500 dark:text-gray-400">({search.type === 'nick' ? '닉네임' : 'ID'})</span>
+                                            </button>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    removeFromRecentSearches(search.query, search.type);
+                                                }}
+                                                className="text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity px-2"
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
                     <select
                         value={searchType}
                         onChange={(e) => setSearchType(e.target.value as 'nick' | 'id')}
@@ -446,6 +563,29 @@ export default function KkukoProfile() {
                     <p className="text-red-600 dark:text-red-500 text-sm mt-2">
                         2026-01-18 17시 이후 게임 접속한 유저에 대해서 조회할 수 있습니다.
                     </p>
+                </div>
+            )}
+
+            {/* Empty State - No search yet */}
+            {!loading && !error && !profileData && (
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-12 text-center">
+                    <div className="max-w-md mx-auto">
+                        <Search className="w-16 h-16 mx-auto mb-4 text-gray-400 dark:text-gray-500" />
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                            유저 검색
+                        </h2>
+                        <p className="text-gray-600 dark:text-gray-400 mb-6">
+                            닉네임 또는 ID로 끄투코리아 유저의 프로필을 조회할 수 있습니다.
+                        </p>
+                        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 text-left">
+                            <p className="text-sm text-blue-700 dark:text-blue-400 font-semibold mb-2">📌 안내</p>
+                            <ul className="text-sm text-blue-600 dark:text-blue-300 space-y-1">
+                                <li>• 2026-01-18 17시 이후 게임 접속한 유저만 조회 가능합니다</li>
+                                <li>• 검색 후 최근 검색 기록이 표시됩니다</li>
+                                <li>• 실시간 접속 상태와 게임 전적을 확인할 수 있습니다</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             )}
 
@@ -741,6 +881,13 @@ export default function KkukoProfile() {
                     </div>
                 </div>
             )}
+
+            {/* Warning Message */}
+            <div className="mt-8 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                <p className="text-sm text-yellow-800 dark:text-yellow-300 text-center">
+                    ⚠️ 해당 데이터는 비공식 API를 사용하여 만들었으며 데이터가 항상 최신이거나 정확하다고 할 수 없습니다. 참고용으로만 사용해주세요.
+                </p>
+            </div>
         </div>
     );
 }
