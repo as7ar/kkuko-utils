@@ -1,77 +1,29 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { Trophy, TrendingUp, Target } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/app/components/ui/tabs';
 import { ModeSelector } from './components/ModeSelector';
 import { RankingList } from './components/RankingList';
 import { RankingPagination } from './components/RankingPagination';
 import { Podium } from './components/Podium';
-import { fetchModes, fetchRanking } from './lib/api';
-import { rankingCache } from './lib/cache';
-import type { Mode, RankingEntry, RankingOption } from '@/app/types/kkuko.types';
+import { useKkukoRanking } from './hooks/useKkukoRanking';
 
 export default function KkukoRanking() {
-    const [modes, setModes] = useState<Mode[]>([]);
-    const [selectedMode, setSelectedMode] = useState<string>('');
-    const [rankings, setRankings] = useState<RankingEntry[]>([]);
-    const [option, setOption] = useState<RankingOption>('win');
-    const [page, setPage] = useState(1);
-    const [loading, setLoading] = useState(false);
-    const [modesLoading, setModesLoading] = useState(true);
-
-    // Fetch modes on mount
-    useEffect(() => {
-        const loadModes = async () => {
-            setModesLoading(true);
-            const modesData = await fetchModes();
-            setModes(modesData);
-            if (modesData.length > 0) {
-                setSelectedMode(modesData[0].modeId);
-            }
-            setModesLoading(false);
-        };
-        loadModes();
-    }, []);
-
-    // Fetch rankings when mode, option, or page changes
-    useEffect(() => {
-        if (!selectedMode) return;
-
-        const loadRankings = async () => {
-            // Check cache first
-            const cacheKey = { mode: selectedMode, page, option };
-            const cachedData = rankingCache.get(cacheKey);
-
-            if (cachedData) {
-                setRankings(cachedData);
-                return;
-            }
-
-            setLoading(true);
-            const rankingsData = await fetchRanking(selectedMode, page, option);
-            setRankings(rankingsData);
-            
-            // Cache the data
-            rankingCache.set(cacheKey, rankingsData);
-            
-            setLoading(false);
-        };
-        loadRankings();
-    }, [selectedMode, page, option]);
-
-    const handleModeChange = (modeId: string) => {
-        setSelectedMode(modeId);
-        setPage(1);
-    };
-
-    const handleOptionChange = (value: string) => {
-        setOption(value as RankingOption);
-        setPage(1);
-    };
+    const {
+        modes,
+        selectedMode,
+        rankings,
+        option,
+        page,
+        loading,
+        modesLoading,
+        handleModeChange,
+        handleOptionChange,
+        handlePageChange: onPageChange
+    } = useKkukoRanking();
 
     const handlePageChange = (newPage: number) => {
-        setPage(newPage);
+        onPageChange(newPage);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 

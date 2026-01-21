@@ -39,3 +39,16 @@ export async function fetchExpRank(userId: string) {
         params: { id: userId }
     });
 }
+
+export async function fetchRanking(
+    mode: string, 
+    page: number = 1, 
+    option: 'win' | 'exp' = 'win'
+) {
+    return await client.get(`/ranking/${mode}`, {
+        params: {
+            page,
+            option
+        }
+    });
+}
