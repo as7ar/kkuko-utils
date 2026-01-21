@@ -5,8 +5,8 @@ import { ProfileData, ItemInfo } from '@/types/kkuko.types';
 import * as profileHelper from '@/app/kkuko/profile/utils/profileHelper';
 
 jest.mock('@/app/kkuko/profile/utils/profileHelper');
-jest.mock('@/app/kkuko/profile/components/ProfileAvatar', () => () => <div data-testid="profile-avatar" />);
-jest.mock('@/app/kkuko/profile/components/TryRenderImg', () => (props: any) => <img alt={props.alt} src={props.url} />);
+jest.mock('@/app/kkuko/shared/components/ProfileAvatar', () => () => <div data-testid="profile-avatar" />);
+jest.mock('@/app/kkuko/shared/components/TryRenderImg', () => (props: any) => <img alt={props.alt} src={props.url} />);
 
 describe('ProfileHeader', () => {
     const mockProfileData: ProfileData = {

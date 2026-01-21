@@ -15,7 +15,7 @@ import {
     parseDescription
 } from '@/app/kkuko/profile/utils/profileHelper';
 import { Equipment, ItemInfo, Mode, KkukoRecord } from '@/types/kkuko.types';
-import { NICKNAME_COLORS, SLOT_NAMES, OPTION_NAMES } from '@/app/kkuko/profile/const';
+import { NICKNAME_COLORS, SLOT_NAMES, OPTION_NAMES } from '@/app/kkuko/shared/lib/const';
 
 describe('profileHelper', () => {
 

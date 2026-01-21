@@ -1,9 +1,9 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useKkukoProfile } from '@/app/kkuko/profile/hooks/useKkukoProfile';
-import * as api from '@/app/kkuko/profile/api';
+import * as api from '@/app/kkuko/shared/lib/api';
 
 // Mock API
-jest.mock('@/app/kkuko/profile/api', () => ({
+jest.mock('@/app/kkuko/shared/lib/api', () => ({
     fetchModes: jest.fn(),
     fetchTotalUsers: jest.fn(),
     fetchProfile: jest.fn(),

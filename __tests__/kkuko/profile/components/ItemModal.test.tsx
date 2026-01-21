@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import ItemModal from '@/app/kkuko/profile/components/ItemModal';
 import { ItemInfo, ProfileData } from '@/app/types/kkuko.types';
 
-jest.mock('@/app/kkuko/profile/components/TryRenderImg', () => () => <div data-testid="item-img" />);
+jest.mock('@/app/kkuko/shared/components/TryRenderImg', () => () => <div data-testid="item-img" />);
 jest.mock('@/app/kkuko/profile/utils/profileHelper', () => ({
     getSlotName: (slot: string) => slot,
     extractColorFromLabel: () => [],
@@ -11,7 +11,7 @@ jest.mock('@/app/kkuko/profile/utils/profileHelper', () => ({
     getOptionName: (key: string) => key,
     formatNumber: (num: number) => num.toString(),
 }));
-jest.mock('@/app/kkuko/profile/const', () => ({
+jest.mock('@/app/kkuko/shared/lib/const', () => ({
     NICKNAME_COLORS: {},
 }));
 

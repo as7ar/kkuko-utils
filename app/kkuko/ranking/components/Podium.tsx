@@ -218,7 +218,7 @@ export function Podium({ topThree, option }: PodiumProps) {
                                     <div className="mt-auto mb-4 px-2 text-center w-full">
                                         <div className="bg-white/10 rounded-lg p-2 backdrop-blur-sm">
                                             <p className="text-xs italic text-white/90 line-clamp-3 font-medium break-keep">
-                                                "{entry.userInfo.exordial}"
+                                                &quot;{entry.userInfo.exordial}&quot;
                                             </p>
                                         </div>
                                     </div>

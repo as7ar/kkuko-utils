@@ -9,20 +9,23 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('ProfileSearch', () => {
-    const mockRouter = { push: jest.fn() };
+    const mockRouter = { push: jest.fn(), replace: jest.fn() };
     const mockSearchParams = { get: jest.fn() };
     const mockOnRemoveRecentSearch = jest.fn();
+    const mockOnSearch = jest.fn();
 
     beforeEach(() => {
         (useRouter as jest.Mock).mockReturnValue(mockRouter);
         (useSearchParams as jest.Mock).mockReturnValue(mockSearchParams);
         mockRouter.push.mockClear();
+        mockRouter.replace.mockClear();
         mockSearchParams.get.mockClear();
         mockOnRemoveRecentSearch.mockClear();
+        mockOnSearch.mockClear();
     });
 
     it('should render search input and button', () => {
-        const { container } = render(<ProfileSearch loading={false} recentSearches={[]} onRemoveRecentSearch={mockOnRemoveRecentSearch} />);
+        const { container } = render(<ProfileSearch loading={false} recentSearches={[]} onRemoveRecentSearch={mockOnRemoveRecentSearch} onSearch={mockOnSearch} />);
         expect(screen.getByPlaceholderText('유저 검색...')).toBeInTheDocument();
         // search button check
         const button = container.querySelector('button.bg-blue-500');
@@ -30,7 +33,7 @@ describe('ProfileSearch', () => {
     });
 
     it('should change search type', () => {
-        render(<ProfileSearch loading={false} recentSearches={[]} onRemoveRecentSearch={mockOnRemoveRecentSearch} />);
+        render(<ProfileSearch loading={false} recentSearches={[]} onRemoveRecentSearch={mockOnRemoveRecentSearch} onSearch={mockOnSearch} />);
         // By default 'nick' is selected (label usually '닉네임')
         // const select = screen.getByRole('combobox'); // If it is a select
         // Or buttons if it's a toggle.
@@ -43,7 +46,7 @@ describe('ProfileSearch', () => {
     });
 
     it('should submit search', () => {
-        const { container } = render(<ProfileSearch loading={false} recentSearches={[]} onRemoveRecentSearch={mockOnRemoveRecentSearch} />);
+        const { container } = render(<ProfileSearch loading={false} recentSearches={[]} onRemoveRecentSearch={mockOnRemoveRecentSearch} onSearch={mockOnSearch} />);
         const input = screen.getByPlaceholderText('유저 검색...');
         fireEvent.change(input, { target: { value: 'testuser' } });
         
@@ -54,12 +57,12 @@ describe('ProfileSearch', () => {
             throw new Error('Search button not found');
         }
 
-        expect(mockRouter.push).toHaveBeenCalledWith('/kkuko/profile?nick=testuser');
+        expect(mockOnSearch).toHaveBeenCalledWith('testuser', 'nick');
     });
 
     it('should show recent searches on focus', () => {
         const recentSearches = [{ query: 'past', type: 'nick', timestamp: 123 } as any];
-        render(<ProfileSearch loading={false} recentSearches={recentSearches} onRemoveRecentSearch={mockOnRemoveRecentSearch} />);
+        render(<ProfileSearch loading={false} recentSearches={recentSearches} onRemoveRecentSearch={mockOnRemoveRecentSearch} onSearch={mockOnSearch} />);
         
         const input = screen.getByPlaceholderText('유저 검색...');
         fireEvent.focus(input);

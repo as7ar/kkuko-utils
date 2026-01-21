@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import ProfileAvatar from '@/app/kkuko/profile/components/ProfileAvatar';
+import ProfileAvatar from '@/app/kkuko/shared/components/ProfileAvatar';
 import { ItemInfo, ProfileData } from '@/app/types/kkuko.types';
 
-jest.mock('@/app/kkuko/profile/components/TryRenderImg', () => {
+jest.mock('@/app/kkuko/shared/components/TryRenderImg', () => {
     return function MockTryRenderImg(props: any) {
         return <img alt={props.alt} src={props.src} data-testid="avatar-layer" />;
     };

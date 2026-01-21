@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import TryRenderImg from '@/app/kkuko/profile/components/TryRenderImg';
+import TryRenderImg from '@/app/kkuko/shared/components/TryRenderImg';
 
 // Mock next/image
 jest.mock("next/image", () => ({ src, alt, onError, onLoad, ...props }: any) => (
