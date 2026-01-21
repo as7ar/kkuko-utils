@@ -10,6 +10,7 @@ import ProfileHeader from './components/ProfileHeader';
 import ProfileStats from './components/ProfileStats';
 import ProfileRecords from './components/ProfileRecords';
 import ItemModal from './components/ItemModal';
+import ErrorModal from '../../components/ErrModal';
 
 export default function KkukoProfile() {
     const searchParams = useSearchParams();
@@ -19,6 +20,8 @@ export default function KkukoProfile() {
         modesData,
         loading,
         error,
+        detailedError,
+        setDetailedError,
         totalUserCount,
         expRank,
         recentSearches,
@@ -126,6 +129,14 @@ export default function KkukoProfile() {
                     itemsData={itemsData}
                     profileData={profileData}
                     onClose={() => setShowItemModal(false)}
+                />
+            )}
+
+            {/* Error Modal */}
+            {detailedError && (
+                <ErrorModal 
+                    error={detailedError} 
+                    onClose={() => setDetailedError(null)} 
                 />
             )}
 

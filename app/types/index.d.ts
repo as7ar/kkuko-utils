@@ -6,6 +6,7 @@ declare global{
         HTTPStatus? : string | number | null;
         HTTPData?: string | null;
         inputValue: string | null;
+        location?: string | null;
     }
     type FetchError = {
         name: string;

@@ -15,11 +15,25 @@ export const useKkukoProfile = () => {
     const [modesData, setModesData] = useState<Mode[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [detailedError, setDetailedError] = useState<ErrorMessage | null>(null);
     const [totalUserCount, setTotalUserCount] = useState<number>(0);
     const [expRank, setExpRank] = useState<number | null>(null);
     
     // Recent searches hook integration
     const { recentSearches, saveToRecentSearches, removeFromRecentSearches } = useRecentSearches();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleError = useCallback((err: any, inputValue: string, location: string) => {
+        const errorMsg: ErrorMessage = {
+            ErrName: err.name || "Error",
+            ErrMessage: err.message || "Unknown error",
+            ErrStackRace: err.stack || null,
+            inputValue: inputValue,
+            location: location
+        };
+        setDetailedError(errorMsg);
+        console.error(`Failed at ${location}:`, err);
+    }, []);
 
     const fetchModes = useCallback(async () => {
         try {
@@ -29,9 +43,9 @@ export const useKkukoProfile = () => {
                 setModesData(result.data);
             }
         } catch (err) {
-            console.error('Failed to fetch modes:', err);
+            handleError(err, 'fetchModes', 'fetchModes');
         }
-    }, []);
+    }, [handleError]);
 
     const fetchTotalUsers = useCallback(async () => {
         try {
@@ -41,9 +55,10 @@ export const useKkukoProfile = () => {
                 setTotalUserCount(result.data.totalUsers);
             }
         } catch (err) {
-            console.error('Failed to fetch total users:', err);
+            handleError(err, 'fetchTotalUsers', 'fetchTotalUsers');
         }
-    }, []);
+    }, [handleError]);
+
 
     const fetchItems = useCallback(async (itemIds: string) => {
         try {
@@ -54,22 +69,23 @@ export const useKkukoProfile = () => {
                 setItemsData(newItems);
             }
         } catch (err) {
-            console.error('Failed to fetch items:', err);
+            handleError(err, itemIds, 'fetchItems');
         }
-    }, []);
+    }, [handleError]);
 
     const fetchExpRank = useCallback(async (userId: string) => {
         try {
             const response = await fetchExpRankApi(userId);
             setExpRank(response.data.rank);
         } catch (err) {
-            console.error('Failed to fetch exp rank:', err);
+            handleError(err, userId, 'fetchExpRank');
         }
-    }, []);
+    }, [handleError]);
 
     const fetchProfile = useCallback(async (query: string, type: 'nick' | 'id') => {
         setLoading(true);
         setError(null);
+        setDetailedError(null);
         setProfileData(null);
         setItemsData([]); 
         setExpRank(null);
@@ -102,11 +118,11 @@ export const useKkukoProfile = () => {
             }
         } catch (err) {
             setError('프로필을 불러오는데 실패했습니다.');
-            console.error(err);
+            handleError(err, query, 'fetchProfile');
         } finally {
             setLoading(false);
         }
-    }, [fetchItems, fetchExpRank, saveToRecentSearches]);
+    }, [fetchItems, fetchExpRank, saveToRecentSearches, handleError]);
 
     // Initial load
     useEffect(() => {
@@ -120,6 +136,8 @@ export const useKkukoProfile = () => {
         modesData,
         loading,
         error,
+        detailedError,
+        setDetailedError,
         totalUserCount,
         expRank,
         recentSearches,

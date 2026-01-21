@@ -11,6 +11,20 @@ export const useKkukoRanking = () => {
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [modesLoading, setModesLoading] = useState(true);
+    const [detailedError, setDetailedError] = useState<ErrorMessage | null>(null);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleError = useCallback((err: any, inputValue: string, location: string) => {
+        const errorMsg: ErrorMessage = {
+            ErrName: err.name || "Error",
+            ErrMessage: err.message || "Unknown error",
+            ErrStackRace: err.stack || null,
+            inputValue: inputValue,
+            location: location
+        };
+        setDetailedError(errorMsg);
+        console.error(`Failed at ${location}:`, err);
+    }, []);
 
     const fetchModes = useCallback(async () => {
         setModesLoading(true);
@@ -22,12 +36,12 @@ export const useKkukoRanking = () => {
                 setSelectedMode(modesData[0].modeId);
             }
         } catch (error) {
-            console.error('Error fetching modes:', error);
+            handleError(error, 'fetchModes', 'fetchModes');
             setModes([]);
         } finally {
             setModesLoading(false);
         }
-    }, []);
+    }, [handleError]);
 
     const fetchRankings = useCallback(async () => {
         if (!selectedMode) return;
@@ -47,12 +61,12 @@ export const useKkukoRanking = () => {
             setRankings(rankingsData);
             rankingCache.set(cacheKey, rankingsData);
         } catch (error) {
-            console.error('Error fetching rankings:', error);
+            handleError(error, `mode: ${selectedMode}, page: ${page}, option: ${option}`, 'fetchRankings');
             setRankings([]);
         } finally {
             setLoading(false);
         }
-    }, [selectedMode, page, option]);
+    }, [selectedMode, page, option, handleError]);
 
     // Fetch modes on mount
     useEffect(() => {
@@ -86,6 +100,8 @@ export const useKkukoRanking = () => {
         page,
         loading,
         modesLoading,
+        detailedError,
+        setDetailedError,
         handleModeChange,
         handleOptionChange,
         handlePageChange

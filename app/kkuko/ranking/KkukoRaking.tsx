@@ -7,6 +7,7 @@ import { RankingList } from './components/RankingList';
 import { RankingPagination } from './components/RankingPagination';
 import { Podium } from './components/Podium';
 import { useKkukoRanking } from './hooks/useKkukoRanking';
+import ErrorModal from '../../components/ErrModal';
 
 export default function KkukoRanking() {
     const {
@@ -17,6 +18,8 @@ export default function KkukoRanking() {
         page,
         loading,
         modesLoading,
+        detailedError,
+        setDetailedError,
         handleModeChange,
         handleOptionChange,
         handlePageChange: onPageChange
@@ -105,6 +108,14 @@ export default function KkukoRanking() {
                     </>
                 )}
             </div>
+
+            {/* Error Modal */}
+            {detailedError && (
+                <ErrorModal 
+                    error={detailedError} 
+                    onClose={() => setDetailedError(null)} 
+                />
+            )}
         </div>
     );
 }

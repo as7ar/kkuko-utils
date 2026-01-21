@@ -7,6 +7,7 @@ export type ErrorMessage = {
     HTTPStatus? : string | number | null;
     HTTPData?: string | null;
     inputValue: string | null;
+    location?: string | null;
 }
 
 export type UserInfo = {
