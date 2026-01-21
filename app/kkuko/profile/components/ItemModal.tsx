@@ -1,8 +1,8 @@
 import React from 'react';
 import { ItemInfo, ProfileData, isSpecialOptions, ItemOption, SpecialOptions } from '@/types/kkuko.types';
-import TryRenderImg from './TryRenderImg';
+import TryRenderImg from '../../shared/components/TryRenderImg'
 import { getSlotName, extractColorFromLabel, parseDescription, getOptionName, formatNumber } from '../utils/profileHelper';
-import { NICKNAME_COLORS } from '../const';
+import { NICKNAME_COLORS } from '../../shared/lib/const';
 
 interface ItemModalProps {
     itemsData: ItemInfo[];

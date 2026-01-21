@@ -1,5 +1,5 @@
 import { Equipment, ItemInfo, KkukoRecord, Mode, isSpecialOptions } from '@/types/kkuko.types';
-import { NICKNAME_COLORS, OPTION_NAMES, SLOT_NAMES } from '../const';
+import { NICKNAME_COLORS, OPTION_NAMES, SLOT_NAMES } from '../../shared/lib/const';
 
 export const getNicknameColor = (equipment: Equipment[], isDarkTheme: boolean): string => {
     const nikItem = equipment.find(eq => eq.slot === 'NIK');

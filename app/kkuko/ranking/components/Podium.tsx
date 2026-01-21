@@ -1,9 +1,12 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { TrendingUp, User, Crown } from 'lucide-react';
 import { Card } from '@/app/components/ui/card';
-import type { RankingEntry, RankingOption } from '@/app/types/kkuko.types';
+import type { RankingEntry, RankingOption, ProfileData, ItemInfo } from '@/app/types/kkuko.types';
+import ProfileAvatar from '../../shared/components/ProfileAvatar';
+import { fetchProfile, fetchItems } from '../../shared/lib/api';
 
 interface PodiumProps {
     topThree: RankingEntry[];
@@ -11,6 +14,61 @@ interface PodiumProps {
 }
 
 export function Podium({ topThree, option }: PodiumProps) {
+    const [profiles, setProfiles] = useState<Record<string, ProfileData>>({});
+    const [itemsData, setItemsData] = useState<ItemInfo[]>([]);
+
+    useEffect(() => {
+        if (topThree.length === 0) return;
+
+        const loadProfiles = async () => {
+            try {
+                // Fetch profiles for all top 3 users parallel
+                const validEntries = topThree.slice(0, 3);
+                
+                const profilePromises = validEntries.map(entry => 
+                    fetchProfile(entry.userInfo.id, 'id')
+                        .then(res => (res.data && res.data.status === 200) ? res.data.data : null)
+                        .catch(err => {
+                            console.error(`Failed to fetch profile for ${entry.userInfo.nickname}`, err);
+                            return null;
+                        })
+                );
+
+                const resolvedProfiles = (await Promise.all(profilePromises)).filter((p): p is ProfileData => p !== null);
+                
+                const newProfiles: Record<string, ProfileData> = {};
+                const allItemIds = new Set<string>();
+
+                resolvedProfiles.forEach(p => {
+                    if (!p || !p.user) return;
+                    newProfiles[p.user.id] = p;
+                    
+                    // Collect item IDs
+                    if (p.equipment) {
+                        p.equipment.forEach(e => {
+                            if (e.itemId) allItemIds.add(e.itemId);
+                        });
+                    }
+                });
+
+                setProfiles(newProfiles);
+
+                // Fetch items details needed for rendering avatars
+                if (allItemIds.size > 0) {
+                    const idsString = Array.from(allItemIds).join(',');
+                    const itemsResponse = await fetchItems(idsString);
+                    if (itemsResponse.data && itemsResponse.data.status === 200) {
+                        setItemsData(itemsResponse.data.data);
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to load podium profiles", error);
+            }
+        };
+
+        loadProfiles();
+    }, [topThree]);
+
     if (topThree.length === 0) return null;
 
     // Ensure we have the entries for 1st, 2nd, 3rd
@@ -73,6 +131,7 @@ export function Podium({ topThree, option }: PodiumProps) {
             {orderedEntries.map((entry) => {
                 const config = getPodiumConfig(entry.rank);
                 const isFirst = entry.rank === 1;
+                const userProfile = profiles[entry.userInfo.id];
 
                 return (
                     <div 
@@ -87,15 +146,24 @@ export function Podium({ topThree, option }: PodiumProps) {
                             
                             {/* Avatar Container: Square with rounded corners */}
                             <div className={`
-                                w-24 h-24 rounded-2xl flex items-center justify-center overflow-hidden
+                                w-32 h-32 rounded-2xl flex items-center justify-center overflow-hidden
                                 border-4 bg-white dark:bg-slate-800 shadow-xl
                                 ${entry.rank === 1 ? 'border-yellow-400 ring-4 ring-yellow-400/30' : 
                                   entry.rank === 2 ? 'border-gray-300' : 'border-amber-600'}
                             `}>
-                                <User className={`w-14 h-14 ${
-                                    entry.rank === 1 ? 'text-yellow-600' : 
-                                    entry.rank === 2 ? 'text-gray-500' : 'text-amber-700'
-                                }`} />
+                                {userProfile ? (
+                                    <div className="transform scale-[0.65] origin-center -mt-2">
+                                        <ProfileAvatar 
+                                            profileData={userProfile}
+                                            itemsData={itemsData}
+                                        />
+                                    </div>
+                                ) : (
+                                    <User className={`w-14 h-14 ${
+                                        entry.rank === 1 ? 'text-yellow-600' : 
+                                        entry.rank === 2 ? 'text-gray-500' : 'text-amber-700'
+                                    }`} />
+                                )}
                             </div>
 
                             <div className={`

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ItemInfo, ProfileData } from '@/types/kkuko.types';
-import TryRenderImg from './TryRenderImg';
-import ProfileAvatar from './ProfileAvatar';
+import TryRenderImg from '../../shared/components/TryRenderImg';
+import ProfileAvatar from '../../shared/components/ProfileAvatar';
 import { getNicknameColor } from '../utils/profileHelper';
 
 interface ProfileHeaderProps {

@@ -5,7 +5,7 @@ import {
     fetchProfile as fetchProfileApi,
     fetchItems as fetchItemsApi,
     fetchExpRank as fetchExpRankApi
-} from '../api';
+} from '../../shared/lib/api';
 import { Equipment, ItemInfo, Mode, ProfileData } from '@/types/kkuko.types';
 import { useRecentSearches } from './useRecentSearches';
 

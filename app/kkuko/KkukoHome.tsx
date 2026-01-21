@@ -30,7 +30,7 @@ export default function KkukoHome() {
                     </h2>
 
                     <p className="text-slate-600 dark:text-slate-300 mb-6 text-center leading-relaxed">
-                        끄투코리아의 유저 정보를 조회하고, 게임 통계 등을 확인할 수 있습니다.
+                        끄투코리아의 유저 정보와 전적 등을 확인할 수 있습니다.
                     </p>
 
                     <Link href="/kkuko/profile" className="block">
