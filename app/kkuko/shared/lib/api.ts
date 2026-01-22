@@ -1,5 +1,6 @@
 import axios from "axios";
 import axiosRetry from "axios-retry";
+import type { Mode, ItemInfo } from "@/types/kkuko.types";
 
 axiosRetry(axios, {
     retries: 5,
@@ -17,7 +18,7 @@ const client = axios.create({
 });
 
 export async function fetchModes() {
-    return await client.get('/mode')
+    return await client.get<{data: Mode[], status: number}>('/mode')
 }
 
 export async function fetchTotalUsers() {
@@ -31,7 +32,7 @@ export async function fetchProfile(query: string, type: 'nick' | 'id') {
 }
 
 export async function fetchItems(itemsIds: string) {
-    return await client.get(`/item?query=${encodeURIComponent(itemsIds)}`);
+    return await client.get<{data: ItemInfo[], status: number}>(`/item?query=${encodeURIComponent(itemsIds)}`);
 }
 
 export async function fetchExpRank(userId: string) {

@@ -21,7 +21,7 @@ export const extractColorFromLabel = (description: string, isDarkTheme: boolean)
 };
 
 export const formatNumber = (num: number): string => {
-    return (num / 10).toString();
+    return (num / 1000).toString();
 };
 
 export const calculateTotalOptions = (itemsData: ItemInfo[]) => {
@@ -32,13 +32,13 @@ export const calculateTotalOptions = (itemsData: ItemInfo[]) => {
             const relevantOptions = Date.now() >= item.options.date ? item.options.after : item.options.before;
             Object.entries(relevantOptions).forEach(([key, value]) => {
                 if (value !== undefined && typeof value === 'number' && !isNaN(value)) {
-                    totals[key] = (totals[key] || 0) + Number(value) * 1000;
+                    totals[key] = (totals[key] || 0) + Number(value) * (key[0] === 'g' ? 100000 : 1000);
                 }
             });
         } else {
             Object.entries(item.options).forEach(([key, value]) => {
                 if (value !== undefined && typeof value === 'number' && !isNaN(value)) {
-                    totals[key] = (totals[key] || 0) + Number(value) * 1000;
+                    totals[key] = (totals[key] || 0) + Number(value) * (key[0] === 'g' ? 100000 : 1000);
                 }
             });
         }
