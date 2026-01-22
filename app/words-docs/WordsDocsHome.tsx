@@ -9,7 +9,7 @@ import { convertQwertyToHangul } from "es-hangul";
 import { useSelector } from "react-redux";
 import type { RootState } from "../store/store";
 import LoginRequiredModal from "../components/LoginRequiredModal";
-import { SCM } from "../lib/supabaseClient";
+import { SCM } from "@/lib/supabaseClient";
 import CompleteModal from "../components/CompleteModal";
 
 interface Document {
@@ -123,7 +123,7 @@ const WordsDocsHome = ({ docs }: WordsDocsHomeProps) => {
         
         const query = searchQuery.toLowerCase().trim();
         return docs.filter(doc => 
-            doc.name.toLowerCase().includes(query) || doc.name.toLocaleLowerCase().includes(convertQwertyToHangul(query))
+            doc.name.toLowerCase().includes(query) || doc.name.toLocaleLowerCase().includes(convertQwertyToHangul(query.replace(/[^a-zA-Z가-힣0-9]/g, "")))
         );
     }, [docs, searchQuery]);
 

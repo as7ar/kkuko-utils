@@ -11,6 +11,20 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/**",
       },
+      {
+        protocol: 'https',
+        hostname: 'cdn.kkutu.co.kr',
+        port: '',
+        pathname: '/img/**',
+      },
+    ],
+    localPatterns: [
+      {
+        pathname: '/api/kkuko/image',
+      },
+      {
+        pathname: '/img/**',
+      },
     ],
   },
 };

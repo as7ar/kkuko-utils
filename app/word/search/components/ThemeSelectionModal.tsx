@@ -3,6 +3,7 @@ import useSWR from 'swr';
 import { X, Loader2 } from 'lucide-react';
 import { SCM } from '@/app/lib/supabaseClient';
 import { Theme } from '../types';
+import { disassemble } from 'es-hangul';
 
 interface ThemeSelectionModalProps {
     isOpen: boolean;
@@ -33,11 +34,14 @@ export default function ThemeSelectionModal({
     const filteredAndGroupedThemes = () => {
         if (!themes) return { groupA: [], groupB: [] };
 
+        const cho = themeSearchQuery.split('').map(c => disassemble(c)[0]).join('');
+
         const filtered = themeSearchQuery.trim() === ''
             ? themes
             : themes.filter(theme => 
                 theme.name.toLowerCase().includes(themeSearchQuery.toLowerCase()) ||
-                theme.code.toLowerCase().includes(themeSearchQuery.toLowerCase())
+                theme.code.toLowerCase().includes(themeSearchQuery.toLowerCase()) ||
+                theme.name.split('').map(c => disassemble(c)[0]).join('').includes(cho)
             );
 
         const groupA = filtered.filter(theme => /^\d+$/.test(theme.code));

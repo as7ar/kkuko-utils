@@ -21,5 +21,9 @@
     "http",
     "net"
   ],
-  "discord.enabled": true
+  "discord.enabled": true,
+  "chat.tools.terminal.autoApprove": {
+    "npx jest": true,
+    "npm run lint": true
+  }
 }
