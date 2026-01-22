@@ -36,6 +36,16 @@
   { message: 'Session saved successfully' }
 ```
 
+#### [POST] /admin/crawler/restart/:channelId
+- 해당 채널의 크롤러를 재시작 합니다
+
+- response schema
+```ts
+{
+    status: "ok",
+    channel: channelId
+}
+```
 
 ### Logs
 #### [GET] /admin/logs/api-server

@@ -1,6 +1,6 @@
 // API Server Admin API Functions
 import axios from 'axios';
-import type { CrawlerHealthResponse, SaveSessionRequest, SaveSessionResponse } from './types';
+import type { CrawlerHealthResponse, SaveSessionRequest, SaveSessionResponse, RestartCrawlerResponse } from './types';
 import { SCM } from '@/app/lib/supabaseClient';
 import zlib from 'zlib';
 
@@ -32,6 +32,18 @@ export const saveCrawlerSession = async (
   const response = await axios.post<SaveSessionResponse>(
     `${BASE_URL}/admin/crawler/session`,
     data,
+    { headers }
+  );
+  return response.data;
+};
+
+export const restartCrawler = async (
+  channelId: string
+): Promise<RestartCrawlerResponse> => {
+  const headers = await getAuthHeaders();
+  const response = await axios.post<RestartCrawlerResponse>(
+    `${BASE_URL}/admin/crawler/restart/${channelId}`,
+    {},
     { headers }
   );
   return response.data;

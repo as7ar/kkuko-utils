@@ -1,9 +1,12 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { fetchCrawlerHealth, saveCrawlerSession } from '../api';
+import { fetchCrawlerHealth, saveCrawlerSession, restartCrawler } from '../api';
 import type { ChannelHealth } from '../types';
 import { Button } from '@/app/components/ui/button';
+import ConfirmModal from '@/app/components/ConfirmModal';
+import CompleteModal from '@/app/components/CompleteModal';
+import FailModal from '@/app/components/FailModal';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
@@ -20,6 +23,16 @@ export default function CrawlerManager() {
   });
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
+  const [restartLoading, setRestartLoading] = useState<string | null>(null);
+
+  // Modal states
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [failOpen, setFailOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+  const [targetChannel, setTargetChannel] = useState<string | null>(null);
 
   const loadCrawlerHealth = useCallback(async () => {
     try {
@@ -43,6 +56,32 @@ export default function CrawlerManager() {
 
     return () => clearInterval(interval);
   }, [loadCrawlerHealth]);
+
+  const initiateRestart = (channelId: string) => {
+    setTargetChannel(channelId);
+    setConfirmOpen(true);
+  };
+
+  const handleRestartConfirm = async () => {
+    if (!targetChannel) return;
+    
+    // Close confirm modal
+    setConfirmOpen(false);
+    
+    try {
+      setRestartLoading(targetChannel);
+      await restartCrawler(targetChannel);
+      await loadCrawlerHealth();
+      setModalMessage(`${targetChannel} 채널 재시작 요청을 완료했습니다.`);
+      setSuccessOpen(true);
+    } catch (err) {
+      setModalMessage(err instanceof Error ? err.message : '재시작 요청에 실패했습니다.');
+      setFailOpen(true);
+    } finally {
+      setRestartLoading(null);
+      setTargetChannel(null);
+    }
+  };
 
   const handleSessionSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,18 +150,42 @@ export default function CrawlerManager() {
             {channels.map((channel) => (
               <div
                 key={channel.id}
-                className="flex items-center justify-between p-4 border dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-700"
+                className={`flex flex-col p-4 border rounded cursor-pointer transition-colors ${
+                  selectedChannel === channel.id
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                    : 'dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
+                }`}
+                onClick={() => setSelectedChannel(selectedChannel === channel.id ? null : channel.id)}
               >
-                <span className="font-medium dark:text-gray-200">{channel.id}</span>
-                <span
-                  className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                    channel.healthy
-                      ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
-                      : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
-                  }`}
-                >
-                  {channel.healthy ? 'Healthy' : 'Unhealthy'}
-                </span>
+                <div className="flex items-center justify-between w-full">
+                  <span className="font-medium dark:text-gray-200">{channel.id}</span>
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                      channel.healthy
+                        ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
+                        : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
+                    }`}
+                  >
+                    {channel.healthy ? 'Healthy' : 'Unhealthy'}
+                  </span>
+                </div>
+                
+                {selectedChannel === channel.id && (
+                  <div className="mt-4 pt-4 border-t dark:border-gray-600 animate-in fade-in slide-in-from-top-2">
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="w-full"
+                      disabled={restartLoading === channel.id}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        initiateRestart(channel.id);
+                      }}
+                    >
+                      {restartLoading === channel.id ? '요청 중...' : '크롤러 재시작'}
+                    </Button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -201,6 +264,28 @@ export default function CrawlerManager() {
           </form>
         )}
       </div>
+
+      <ConfirmModal
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleRestartConfirm}
+        title="크롤러 재시작"
+        description={`${targetChannel} 채널의 크롤러를 재시작하시겠습니까?`}
+      />
+
+      <CompleteModal
+        open={successOpen}
+        onClose={() => setSuccessOpen(false)}
+        title="요청 성공"
+        description={modalMessage}
+      />
+
+      <FailModal
+        open={failOpen}
+        onClose={() => setFailOpen(false)}
+        title="요청 실패"
+        description={modalMessage}
+      />
     </div>
   );
 }

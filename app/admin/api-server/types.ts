@@ -18,3 +18,8 @@ export interface SaveSessionRequest {
 export interface SaveSessionResponse {
   message: string;
 }
+
+export interface RestartCrawlerResponse {
+  status: string;
+  channel: string;
+}
