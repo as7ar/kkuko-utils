@@ -21,7 +21,7 @@ export const extractColorFromLabel = (description: string, isDarkTheme: boolean)
 };
 
 export const formatNumber = (num: number): string => {
-    return (num / 1000).toString();
+    return (num / 10).toString();
 };
 
 export const calculateTotalOptions = (itemsData: ItemInfo[]) => {

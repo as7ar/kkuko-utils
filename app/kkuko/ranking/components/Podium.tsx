@@ -208,7 +208,7 @@ export function Podium({ topThree, option }: PodiumProps) {
                                             </span>
                                         </div>
                                         <div className="text-xs opacity-90 font-medium">
-                                            승률 {winRate(entry)}%
+                                            {entry.userRecord.total.toLocaleString()}전 / 승률 {winRate(entry)}%
                                         </div>
                                     </div>
                                 </div>
