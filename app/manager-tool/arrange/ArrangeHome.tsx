@@ -542,29 +542,43 @@ const ToolSector = ({ fileContent, setFileContent, setLineCount, setErrorModalVi
     // 정렬 v3
     const handleSortWordv3 = () => {
         try {
-            const updatedContent = fileContent.split("\n").filter((word)=>word!=="" && !word.includes('=[')).sort((a, b) => {
+            const filtered = fileContent.split("\n").filter((word) => word !== "" && !word.includes('=['));
+            const sorted = filtered.sort((a, b) => {
                 const aFirst = a[0];
                 const bFirst = b[0];
                 if (aFirst === bFirst) {
-                    if (a.length === b.length) {
-                        return a.localeCompare(b, "ko-KR");
-                    }
+                    if (a.length === b.length) return a.localeCompare(b, "ko-KR");
                     return b.length - a.length;
                 }
                 return aFirst.localeCompare(bFirst, "ko-KR");
             });
-            if (updatedContent.join('\n') === fileContent) return;
+
+            // 그룹 헤더 추가 (=[X]= 형식)
+            let groupedText = '';
+            let currentChar: string | null = null;
+            for (const word of sorted) {
+                if (!word) continue;
+                const firstChar = word[0].toLowerCase();
+                if (currentChar !== firstChar) {
+                    if (currentChar !== null) groupedText += '\n';
+                    groupedText += `=[${firstChar.toUpperCase()}]=\n`;
+                    currentChar = firstChar;
+                }
+                groupedText += word + '\n';
+            }
+
+            const updatedContent = groupedText.trim();
+            if (updatedContent === fileContent) return;
             pushToUndoStack(fileContent);
-            setFileContent(updatedContent.join('\n'));
-            setLineCount(updatedContent.length);
-            console.log(updatedContent)
+            setFileContent(updatedContent);
+            setLineCount(updatedContent.split("\n").length);
         } catch (err) {
             if (err instanceof Error) {
                 setErrorModalView({
                     ErrName: err.name,
                     ErrMessage: err.message,
                     ErrStackRace: err.stack,
-                    inputValue: `SortWordv1 | ${fileContent}`
+                    inputValue: `SortWordv3 | ${fileContent}`
                 });
 
             } else {
@@ -572,7 +586,7 @@ const ToolSector = ({ fileContent, setFileContent, setLineCount, setErrorModalVi
                     ErrName: null,
                     ErrMessage: null,
                     ErrStackRace: err as string,
-                    inputValue: `SortWordv1 | ${fileContent}`
+                    inputValue: `SortWordv3 | ${fileContent}`
                 });
             }
         }
