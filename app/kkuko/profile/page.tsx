@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import KkukoProfile from './KkukoProfile'
 
 export async function generateMetadata() {
@@ -16,5 +17,9 @@ export async function generateMetadata() {
 }
 
 export default function KkukoProfilePage() {
-    return <KkukoProfile />;
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <KkukoProfile />
+        </Suspense>
+    );
 }
