@@ -1,3 +1,9 @@
+# [v1.5.1](https://github.com/SolidLoop-studio/kkuko-utils/compare/v1.5.0...v1.5.1) - 2026-01-22
+
+## fix
+- ([52ce05b](https://github.com/SolidLoop-studio/kkuko-utils/commit/52ce05b)) - 랭킹 123 판수 표시
+- ([9f8be19](https://github.com/SolidLoop-studio/kkuko-utils/commit/9f8be19)) - 옵션 계산식 오류 수정
+
 # [v1.5.0](https://github.com/SolidLoop-studio/kkuko-utils/compare/v1.4.0...v1.5.0) - 2026-01-22
 
 ## feat
