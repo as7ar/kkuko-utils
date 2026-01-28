@@ -24,6 +24,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
 	title: "kkuko utils",
 	description: "kkuko utils",
+	other: {
+		"google-site-verification": "9S-pBWeO6GWhOwqQ0AQ8zbKpCoiGkzBMmtjU98ynoMI",
+	},
 	openGraph: {
 		title: "끄코 유틸리티",
 		description: "끄코 유틸리티",

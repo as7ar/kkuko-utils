@@ -134,7 +134,7 @@ const LoopWordExtractorApp = () => {
                         <div className="flex items-center space-x-2">
                             <Link href="/manager-tool/extract">
                                 <Button variant="outline" size="sm">
-                                    <Home size="sm" />
+                                    <Home className="sm" />
                                     도구홈
                                 </Button>
                             </Link>
