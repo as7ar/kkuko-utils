@@ -127,7 +127,7 @@ const WordExtractorApp = () => {
                         <div className="flex items-center space-x-2">
                             <Link href="/manager-tool/extract">
                                 <Button variant="outline" size="sm" className="dark:text-gray-200 dark:bg-gray-800 dark:border-gray-700">
-                                    <Home size="sm"/>
+                                    <Home className="sm" />
                                     도구홈
                                 </Button>
                             </Link>
